@@ -2,7 +2,6 @@
 # include("load_titanic.jl")
 # train, test = load()
 
-using MLLabelUtils
 using JuliaDB
 
 function convert_embarked(loc)
@@ -51,5 +50,11 @@ function load()
     test = titanic_clean[sort(test_indeces)]
     train = titanic_clean[sort(train_indeces)]
 
-    return table_to_array(train), table_to_array(test)
+    train_targets = copy( select(train, :Survived) )
+    train = popcol(train, :Survived)
+
+    test_targets = copy( select(test, :Survived) )
+    test = popcol(test, :Survived)
+
+    return table_to_array(train), train_targets, table_to_array(test), test_targets
 end
