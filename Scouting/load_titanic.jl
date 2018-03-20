@@ -23,7 +23,8 @@ function load()
     to_remove = ( Missings.ismissing.( train[6] ) )
     to_remove = to_remove .| (Missings.ismissing.(train[12]))
     train = train[ .!to_remove, : ]
-    train = train[:, [:PassengerId, :Survived, :Pclass, :Sex, :Age, :SibSp, :Parch, :Fare, :Embarked] ]
+    train_targets = train[:, :Survived]
+    train = train[:, [:PassengerId, :Pclass, :Sex, :Age, :SibSp, :Parch, :Fare, :Embarked] ]
 
     # Convert categorical to integers
     train[:Sex] = convert.(Int32, train[:Sex] .== "male" )
@@ -36,8 +37,13 @@ function load()
     test_indeces = X[1:80]
     train_indeces = X[81:end]
 
+    # Divide into training-testing sets
     test = train[test_indeces, :]
+    test_targets = train_targets[test_indeces,:]
     train = train[train_indeces, :]
+    train_targets = train_targets[train_indeces,:]
 
-    return convert(Array{Float64}, train), convert(Array{Float64}, test)
+    return  convert(Array{Float64}, train), convert(Array{Int64}, train_targets),
+            convert(Array{Float64}, test), convert(Array{Int64}, test_targets)
+
 end
