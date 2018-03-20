@@ -3,7 +3,7 @@
 # train, test = load()
 
 using MLLabelUtils
-using CSV
+using JuliaDB
 
 function convert_embarked(loc)
     if loc == "S"
@@ -15,35 +15,41 @@ function convert_embarked(loc)
     end
 end
 
+# converts JuliaDB table to
+# a regular array
+function table_to_array(tab)
+    arr = zeros(length(tab),length(tab[1]))
+    for i = 1:length(tab[1])
+        arr[:,i] = select(tab,i)
+    end
+    return arr
+end
+
 function load()
     # Load dataset
-    train = CSV.read("titanic_train.csv")
+    titanic = loadtable("titanic_train.csv")
+    # remove any rows with NA values
+    titanic_clean = dropna(titanic)
 
-    # Remove columns and missing rows from train set
-    to_remove = ( Missings.ismissing.( train[6] ) )
-    to_remove = to_remove .| (Missings.ismissing.(train[12]))
-    train = train[ .!to_remove, : ]
-    train_targets = train[:, :Survived]
-    train = train[:, [:PassengerId, :Pclass, :Sex, :Age, :SibSp, :Parch, :Fare, :Embarked] ]
+    # codify categorics
+    titanic_clean = setcol(titanic_clean, :Sex, convert.(Int32, select(titanic_clean,:Sex) .== "male" ))
+    titanic_clean = setcol(titanic_clean, :Embarked, convert_embarked.(select(titanic_clean,:Embarked)))
 
-    # Convert categorical to integers
-    train[:Sex] = convert.(Int32, train[:Sex] .== "male" )
-    train[:Embarked] = convert_embarked.(train[:Embarked])
+    # get rid of some columns
+    titanic_clean = popcol(titanic_clean, :Ticket)
+    titanic_clean = popcol(titanic_clean, :Cabin)
+    titanic_clean =popcol(titanic_clean, :Name)
 
     # Divide into training-testing sets (fix seed)
     srand(1234)
-    X = collect(1:length(train[1]))
+    X = collect(1:length(titanic_clean))
     X = X[randperm(length(X))]
     test_indeces = X[1:80]
     train_indeces = X[81:end]
 
-    # Divide into training-testing sets
-    test = train[test_indeces, :]
-    test_targets = train_targets[test_indeces,:]
-    train = train[train_indeces, :]
-    train_targets = train_targets[train_indeces,:]
+    # assemble the random samples
+    test = titanic_clean[sort(test_indeces)]
+    train = titanic_clean[sort(train_indeces)]
 
-    return  convert(Array{Float64}, train), convert(Array{Int64}, train_targets),
-            convert(Array{Float64}, test), convert(Array{Int64}, test_targets)
-
+    return table_to_array(train), table_to_array(test)
 end
