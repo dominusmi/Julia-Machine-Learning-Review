@@ -1,6 +1,9 @@
 # Usage:
 # include("load_titanic.jl")
-# train, test = load()
+# to return as arrays
+# train, train_targets, test, test_targets = load()
+# to return as JuliaDB tables
+# train, train_targets, test, test_targets = load(true)
 
 using JuliaDB
 
@@ -24,7 +27,7 @@ function table_to_array(tab)
     return arr
 end
 
-function load()
+function load(as_table = false)
     # Load dataset
     titanic = loadtable("resources/titanic_train.csv")
     # remove any rows with NA values
@@ -56,5 +59,9 @@ function load()
     test_targets = copy( select(test, :Survived) )
     test = popcol(test, :Survived)
 
-    return table_to_array(train), train_targets, table_to_array(test), test_targets
+    if(as_table)
+      return train, table(train_targets, names=[:Survived]), test, table(test_targets,names=[:Survived])
+    else
+      return table_to_array(train), train_targets, table_to_array(test), test_targets
+    end
 end
