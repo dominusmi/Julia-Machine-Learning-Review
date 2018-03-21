@@ -26,7 +26,7 @@ end
 
 function load()
     # Load dataset
-    titanic = loadtable("titanic_train.csv")
+    titanic = loadtable("resources/titanic_train.csv")
     # remove any rows with NA values
     titanic_clean = dropna(titanic)
 
