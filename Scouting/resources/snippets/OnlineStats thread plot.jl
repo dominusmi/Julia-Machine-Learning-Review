@@ -39,7 +39,7 @@ for (size_index, n_obs) in enumerate(sizes)
         s2 = Series(StatLearn(6, L2Penalty(), L2DistLoss(), fill(0.1, 6), SGD()))
         s3 = Series(StatLearn(6, L2Penalty(), L2DistLoss(), fill(0.1, 6), SGD()))
 
-        set_size = convert(Int32, n_obs/3)    
+        set_size = convert(Int32, n_obs/3)
 
         tic()
         # Divide task into three
