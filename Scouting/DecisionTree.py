@@ -34,7 +34,7 @@ print("RandomForest", Times)
 n=6
 Times = np.zeros(n+1)
 for i in range(1,n+1):
-    clf = DecisionTreeClassifier()
+    clf = DecisionTreeClassifier(criterion='entropy')
     X,T = expand_df(X_train,T_train,10**i)
     start = time.time()
     print(X.shape)
