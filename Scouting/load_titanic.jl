@@ -65,3 +65,25 @@ function load(as_table = false)
       return table_to_array(train), train_targets, table_to_array(test), test_targets
     end
 end
+
+# generates some extra titanic data instances
+# from random sampling of each column
+# works on arrays
+function expand_data(data,targets,n=500)
+    # only binary classes
+    x0 = find(targets.==0)
+    x1 = find(targets.==1)
+
+    new_X = zeros(2*n,size(data)[2])
+    new_T = vcat(zeros(n),ones(n))
+    for i in 1:size(data)[2]
+        new_X[:,i] = vcat(rand(data[x0,i],n), rand(data[x1,i],n))
+    end
+    # so PassengersId is different
+    new_X[:,1] = new_X[:,1]+1000;
+    s = shuffle(1:size(new_X)[1]);
+    new_X = new_X[s,:];
+    new_T = new_T[s,:];
+    
+    return new_X,reshape(new_T,2*n)
+end
