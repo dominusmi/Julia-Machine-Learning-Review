@@ -1,4 +1,4 @@
-# Julia Statistics and Machine Learning ibrary compilation
+# Julia Statistics and Machine Learning Library Compilation
 ## University of Warwick Research Group
 
 In this repository, we aim to provide the Julia community with a simple way of finding the best up to date packages for multiple types of statical and machine learning models.
