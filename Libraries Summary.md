@@ -32,7 +32,7 @@ cross-validation (Kfold, stratified Kfold, subsmapling), and grid search hyperpa
 
 
 |                       | [MLPreprocessing.jl](Scouting/MLPreprocessing.ipynb) | [MLLabelUtils.jl](Scouting/MLLabelUtils.ipynb) | [MLBase.jl](Scouting/MLBase.jl.ipynb)|
-| :- | :- |
+| :- | :- |:-|
 | Packages works            | yes | yes || yes|
 | Deprecation warnings      | None | No ||No|
 | Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |If tables transformed into arrays|
