@@ -26,15 +26,17 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 
 - _MLPreprocessing_ is used to do simple scaling/normalising
 - _MLLabelUtils_ provides functions to modify the labels to be compatible with whatever the algorithm requires. For instance transform into categorical, booleans, from text to number etc
+- MLBase provides function for label encoding, classification from model scores, performance evaluation (ROC, F1 etc),
+cross-validation (Kfold, stratified Kfold, subsmapling), and grid search hyperparameter tuning.
 
 
 
-|                       | [MLPreprocessing.jl](Scouting/MLPreprocessing.ipynb) | [MLLabelUtils.jl](Scouting/MLLabelUtils.ipynb) |      
-| :-: | :-: | :-: |
-| Packages works            | yes | yes |
-| Deprecation warnings      | None | No |
-| Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |
-| Contains Documetation     | No, but sufficient examples | yes |
-| Simplicity                | Fair | good |
+|                       | [MLPreprocessing.jl](Scouting/MLPreprocessing.ipynb) | [MLLabelUtils.jl](Scouting/MLLabelUtils.ipynb) | [MLBase.jl](Scouting/MLBase.jl.ipynb)|
+| :- | :- |
+| Packages works            | yes | yes || yes|
+| Deprecation warnings      | None | No ||No|
+| Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |If tables transformed into arrays|
+| Contains Documetation     | No, but sufficient examples | yes ||yes|
+| Simplicity                | Fair | good ||good|
 
 
