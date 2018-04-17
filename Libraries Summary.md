@@ -14,13 +14,15 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 
 ### Decision Trees
 
-|                       | [DecisionTrees.jl](Scouting/DecisionTree.ipynb) |  [ScikitLearn.jl](Scouting/ScikitLearn.jl.ipynb) |
-| :-: | :-: | :-: |
-| Packages works            | yes                               | Yes |
-| Deprecation warnings      | None                              | Some      |
-| Compatible with JuliaDB   | If tables are converted to arrays | Yes (transformation of tables to arrays required) |
-| Contains Documetation     | No, but many examples             | Yes (very good!) |
-| Simplicity                | Good, like sklearn                | good |
+
+
+|   | [DecisionTrees.jl](Scouting/DecisionTree.ipynb) |  [ScikitLearn.jl](Scouting/ScikitLearn.jl.ipynb) | OnlineStats.jl |
+| :-: | :-: | :-: | :-: |
+| Packages works            | yes                               | Yes | Yes
+| Deprecation warnings      | None                              | Some | None
+| Compatible with JuliaDB   | Yes (transformation of tables to arrays required) | Yes (transformation of tables to arrays required) | Yes (transformation of tables to arrays required) |
+| Contains Documetation     | No, but many examples             | Yes (very good!) | No |
+| Simplicity                | Good, like sklearn                | good | quite low |
 
 ### Utilities
 
