@@ -14,7 +14,10 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 
 ### Decision Trees
 
+A generic notebook discussing decision tree models is available [here](Scouting/Decision%20Tree%20Models.ipynb). Note:
 
+- DecisionTrees.jl was found to be about one order of magnitude slower than the python version
+- OnlineStats only has an implementation for a type of tree called FastTree (and its ensemble, the FastForest)
 
 |   | [DecisionTrees.jl](Scouting/DecisionTree.ipynb) |  [ScikitLearn.jl](Scouting/ScikitLearn.jl.ipynb) | OnlineStats.jl |
 | :-: | :-: | :-: | :-: |
