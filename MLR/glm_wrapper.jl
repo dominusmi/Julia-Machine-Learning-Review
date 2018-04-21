@@ -1,5 +1,17 @@
 using SparseRegression
 
+############# MODEL SPECIFIC CONSTRUCTORS #################
+
+"""
+    Functions specifying how model should be constructed given parameters
+    These function are completely model dependent and are the only ones
+    that need to be written to add a new model to the list.
+
+    TODO:
+    - Add more models
+    - Add functions specifying which parameter per model and what form they should take
+    - Make checks that parameters are of the type/form that they should
+"""
 function makeRidge(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
         model = SModel(data[:, task.features], data[:, task.target])
@@ -55,7 +67,7 @@ function makeGlm(learner::Learner, task::Task, data)
     MLRModel(model, copy(learner.parameters))
 end
 
-
+# Utiliy function #
 function get_λ(parameters, task)
     if get(parameters, "λ", false) == false
         lambda = fill(0.0, task.features)
@@ -67,11 +79,18 @@ function get_λ(parameters, task)
     lambda
 end
 
+################## MODEL SPECIFIC ALGORITHMS ####################
 
+"""
+    How to predict using a specific model
+"""
 function predictᵧ(modelᵧ::MLRModel{<:SModel}; data=data, task=task)
     predict(modelᵧ.model, data[:, task.features])
 end
 
+"""
+    How to learn using a specific model
+"""
 function learnᵧ!(modelᵧ::MLRModel{<:SModel}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
     learn!(modelᵧ.model)
 end

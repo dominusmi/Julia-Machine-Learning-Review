@@ -4,6 +4,11 @@ import MLBase: Kfold
 using MLMetrics
 using SparseRegression
 
+"""
+    Contains task type (regression,classification,..)
+    and the columns to use as target and as features.
+    TODO: accept multiple targets
+"""
 immutable Task
     task_type::String
     target::Int
@@ -21,6 +26,9 @@ function Task(;task_type="regression", target=nothing, data=nothing)
     Task(task_type, target, features)
 end
 
+"""
+    Contains the name and the parameters of the model to train.
+"""
 immutable Learner
     name::String
     parameters::Union{Void,Dict{Any}}
@@ -35,20 +43,44 @@ function show(io::IO,l::Learner)
     end
 end
 
+"""
+    Allows resampling for cross validation
+    TODO: add more methods (only accepts k-fold)
+"""
 immutable Resampling
     method::String
     iterations::Int
     Resampling() = new("KFold", 3)
 end
 
+
+"""
+ A parameter set allows a user to add multiple parameters to tune
+ It must include a name. Constructor only accepts key arguments
+ TODO: parameters cross-checked by learner to see whether they are valid
+"""
 abstract type Parameter end
 
+"""
+    Discrete parameter requires a name and an array of value to check
+    TODO: check whether values are correct for specific learner
+"""
 immutable DiscreteParameter <: Parameter
     name::String
     values::Array{Any}
     DiscreteParameter(;name=nothing,values=nothing) = new(name, values)
 end
 
+"""
+    Tuning of a parameter. Must provide name, lower&upper bound, and transform
+    that iterates through values in lower:upper and gives te actual parameter to test
+
+    e.g.
+    ```julia
+        # Will check λ={1,4,9,16}
+        ContinuousParameter("λ", 1, 4, x->x²)
+    ```
+"""
 immutable ContinuousParameter <: Parameter
     name::String
     lower::Real
@@ -57,12 +89,18 @@ immutable ContinuousParameter <: Parameter
     ContinuousParameter(;name=nothing, lower=nothing, upper=nothing, transform=nothing) = new(name, lower, upper, transform)
 end
 
-
+"""
+    Set of parameters.
+    Will be used to implement checks on validity of parameters
+"""
 immutable ParametersSet
    parameters::Array{Parameter}
 end
 getindex(p::ParametersSet, i::Int64) = p.parameters[i]
 
+"""
+    Abstraction layer for model
+"""
 immutable MLRModel{T}
     model::T
     parameters
@@ -70,7 +108,11 @@ end
 
 
 #### ABSTRACT FUNCTIONS ####
-
+"""
+    Constructor for any model. Will call the function makeModelname, where
+    modelname is stored in learner.name
+    Function makeModelname should be defined separately for each model
+"""
 function MLRModel(learner::Learner, task::Task, data)
     # Calls function with name "makeModelname"
     f_name = learner.name
@@ -80,6 +122,10 @@ function MLRModel(learner::Learner, task::Task, data)
     f(learner, task, data)
 end
 
+"""
+    Function which sets up model given by learner, and then calls model-based
+    learning function, which must be defined separately for each model.
+"""
 function learnᵧ(learner::Learner, task::Task, data)
     modelᵧ = MLRModel(learner, task, data)
     learnᵧ!(modelᵧ, learner=learner, task=task, data=data)
@@ -87,7 +133,6 @@ function learnᵧ(learner::Learner, task::Task, data)
 end
 
 #### UTILITIES ####
-
 function Fakedata(N,d)
     n_obs = 100
     x = randn((n_obs,d))

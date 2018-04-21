@@ -58,6 +58,8 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
                 parameters_set=nothing::ParametersSet, sampler=Resampling()::Resampling,
                 measure=nothing::Function)
 
+    # TODO: divide and clean up code. Use better goddam variable names.
+
     n_parameters = length(parameters_set.parameters)
     n_obs        = size(data,1)
 
