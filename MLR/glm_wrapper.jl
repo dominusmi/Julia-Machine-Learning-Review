@@ -17,8 +17,9 @@ function makeRidge(learner::Learner, task::Task, data)
         model = SModel(data[:, task.features], data[:, task.target])
     else
         parameters = []
-        push!(parameters, get_λ(learner.parameters, data))
-        model = SModel(data[:, task.features], data[:, task.target], L2DistLoss(), L2Penalty(), parameters...)
+        push!(parameters, get_λ(learner.parameters, task))
+        model = SModel(data[:, task.features], data[:, task.target],
+                        L2DistLoss(), L2Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -28,8 +29,9 @@ function makeLasso(learner::Learner, task::Task, data)
         model = SModel(data[:, task.features], data[:, task.target])
     else
         parameters = []
-        push!(parameters, get_λ(learner.parameters, data))
-        model = SModel(data[:, task.features], data[:, task.target], L2DistLoss(), L1Penalty(), parameters...)
+        push!(parameters, get_λ(learner.parameters, task))
+        model = SModel(data[:, task.features], data[:, task.target],
+                        L2DistLoss(), L1Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -39,8 +41,9 @@ function makeElasticnet(learner::Learner, task::Task, data)
         model = SModel(data[:, task.features], data[:, task.target])
     else
         parameters = []
-        push!(parameters, get_λ(learner.parameters, data))
-        model = SModel(data[:, task.features], data[:, task.target], L2DistLoss(), ElasticNetPenalty(α=0.5), parameters...)
+        push!(parameters, get_λ(learner.parameters, task))
+        model = SModel(data[:, task.features], data[:, task.target],
+                        L2DistLoss(), ElasticNetPenalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -68,7 +71,7 @@ function makeGlm(learner::Learner, task::Task, data)
 end
 
 # Utiliy function #
-function get_λ(parameters, task)
+function get_λ(parameters, task::Task)
     if get(parameters, "λ", false) == false
         lambda = fill(0.0, task.features)
     elseif typeof(parameters["λ"]) <: Real
