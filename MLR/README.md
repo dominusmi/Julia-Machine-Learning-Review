@@ -12,7 +12,7 @@ without losing any of the features.
 <input type="checkbox" checked disabled> Implement tuning for discrete parameters
 <input type="checkbox" checked disabled> Basic custom sampling method (K-fold)
 <input type="checkbox" checked disabled> Basic CV with custom score
-<input type="checkbox" disabled disabled> Wrap at least a handful of models for regression, classification and clustering
+<input type="checkbox" disabled disabled> Wrap at least a handful of models for regression & classification
 <input type="checkbox" disabled disabled> Find a way to make it clear what arguments a model expects
 <input type="checkbox" disabled> Allow any sampling methods from `MLBase.jl`
 <input type="checkbox" disabled disabled> Add compatibility with multiple targets

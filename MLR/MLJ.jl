@@ -1,6 +1,6 @@
 import StatsBase: predict
 import Base: getindex, show
-import MLBase: Kfold
+import MLBase: Kfold, fit!, predict
 using MLMetrics
 using SparseRegression
 
@@ -31,9 +31,9 @@ end
 """
 immutable Learner
     name::String
-    parameters::Union{Void,Dict{Any}}
+    parameters::Union{Void,Dict{Any, Any}}
     Learner(learner::String) = new(learner, Dict())
-    Learner(learner::String, parameters::Dict{Any}) = new(learner, parameters)
+    Learner(learner::String, parameters::Dict) = new(learner, parameters)
 end
 
 function show(io::IO,l::Learner)

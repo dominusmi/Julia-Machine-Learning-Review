@@ -3,8 +3,6 @@ using LIBSVM
 # model = svmtrain(train,train_targets,probability=true)   #train the classifier (default: radial basis kernel)
 # (predicted_labels, decision_values) = svmpredict(model, test);
 
-immutable LibSVM end
-
 
 function makeLibsvm(learner::Learner, task::Task, data)
     parameters = Dict()
