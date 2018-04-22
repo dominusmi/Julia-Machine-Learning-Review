@@ -1,6 +1,6 @@
 import StatsBase: predict
 import Base: getindex, show
-import MLBase: Kfold
+import MLBase: Kfold, fit!
 using MLMetrics
 using SparseRegression
 
@@ -101,11 +101,12 @@ getindex(p::ParametersSet, i::Int64) = p.parameters[i]
 """
     Abstraction layer for model
 """
-immutable MLRModel{T}
+mutable struct MLRModel{T}
     model::T
     parameters
+    inplace::Bool
 end
-
+MLRModel(model, parameters::Dict; inplace=true) = MLRModel(model, parameters, inplace)
 
 #### ABSTRACT FUNCTIONS ####
 """
@@ -128,7 +129,11 @@ end
 """
 function learnᵧ(learner::Learner, task::Task, data)
     modelᵧ = MLRModel(learner, task, data)
-    learnᵧ!(modelᵧ, learner=learner, task=task, data=data)
+    if modelᵧ.inplace
+        learnᵧ!(modelᵧ, learner=learner, task=task, data=data)
+    else
+        modelᵧ = learnᵧ(modelᵧ, learner=learner, task=task, data=data)
+    end
     modelᵧ
 end
 
@@ -137,6 +142,14 @@ function Fakedata(N,d)
     n_obs = 100
     x = randn((n_obs,d))
     y = sum(x*randn(d),2)
+
+    hcat(x,y)
+end
+
+function FakedataClassif(N,d)
+    n_obs = 100
+    x = randn((n_obs,d))
+    y = ( sum(x*randn(d),2) .> mean(sum(x*randn(d),2)) )
 
     hcat(x,y)
 end

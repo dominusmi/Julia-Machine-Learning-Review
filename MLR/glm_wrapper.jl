@@ -88,7 +88,8 @@ end
     How to predict using a specific model
 """
 function predictᵧ(modelᵧ::MLRModel{<:SModel}; data=data, task=task)
-    predict(modelᵧ.model, data[:, task.features])
+    predictions = predict(modelᵧ.model, data[:, task.features])
+    preditions, nothing
 end
 
 """

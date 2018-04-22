@@ -10,9 +10,7 @@ function update_parameters!(array, range)
             try
                 array[i+1] += 1
             catch e
-                println("$i is the culprit")
-                println("$(array[i]), $(range[i])")
-                println("$range, $array")
+                println("Array out of bound while updating parameters")
             end
 
             array[i] = range[i][1]
@@ -105,10 +103,11 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
         scores = []
         for j in 1:length(trainⱼ)
             modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], :])
-            preds = predictᵧ(modelᵧ, data=data[testⱼ[j],:], task=task)
+            preds, probs = predictᵧ(modelᵧ, data=data[testⱼ[j],:], task=task)
 
             score = measure( data[testⱼ[j], task.target], preds)
             push!(scores, score)
+            println(preds)
         end
         println("Trained:")
         println(lrn)
@@ -116,5 +115,58 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
 
         update_parameters!(parameters_array, parameters_range)
 
+    end
+end
+
+
+# greedy
+# compare with variable selection in MLR https://github.com/mlr-org/mlr/blob/bb32eb8f6e7cbcd3a653440325a28632843de9f6/R/selectFeaturesSequential.R
+# backwards is here http://scikit-learn.org/stable/modules/generated/sklearn.feature_selection.RFE.html#sklearn.feature_selection.RFE
+
+function variable_select_forward(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matrix{Real}, sampler=Resampling()::Resampling,
+                measure=nothing::Function)
+
+    # TODO: divide and clean up code. Use better goddam variable names.
+
+    p=size(data)[2];
+
+    vars=Set([1:p;])
+    selvar=Int64[]
+    # Loop over parameters
+
+    while lengths(selvars)< p
+        print("$(length(selvar)+1). Variables")
+
+        res=[]
+        resv=[]
+        for v in vars
+            tmpvars= vcat(selvar, [v])
+
+        # Set new parametersparameters_set[i].values
+
+
+            # Update learner with new parameters
+            lrn = Learner(learner.name)
+
+            # Get training/testing validation sets
+            trainⱼ, testⱼ = get_samples(sampler, n_obs)
+
+            scores = []
+            for j in 1:length(trainⱼ)
+                modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], tmpvars])
+                preds = predictᵧ(modelᵧ, data=data[testⱼ[j],tmpvars], task=task)
+
+                score = measure( data[testⱼ[j], task.target], preds)
+                push!(scores, score)
+            end
+            println("Trained:")
+            println(lrn)
+            println("Average CV accuracy: $(mean(scores))\n")
+            push!(res,mean(scores))
+            push!(resv,v)
+
+        end
+        i=argmax(res)
+        @show selvar=resv[i]
     end
 end
