@@ -125,16 +125,18 @@ end
 function variable_select_forward(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matrix{Real}, sampler=Resampling()::Resampling,
             measure=nothing::Function)
     # TODO: divide and clean up code. Use better goddam variable names.
+    n_obs        = size(data,1)
+
     p=size(data)[2]
     vars=Set([1:p;])
     selvar=Int64[]
     # Loop over parameters
-    while lengths(selvars)< p
+    while length(selvar)< p
         print("$(length(selvar)+1). Variables")
         res=[]
         resv=[]
         for v in vars
-            tmpvars= vcat(selvar, [v])
+            @show tmpvars= vcat(selvar, [v])
         # Set new parametersparameters_set[i].values
             # Update learner with new parameters
             lrn = Learner(learner.name)
@@ -142,6 +144,8 @@ function variable_select_forward(;learner=nothing::Learner, task=nothing::Task, 
             trainⱼ, testⱼ = get_samples(sampler, n_obs)
             scores = []
             for j in 1:length(trainⱼ)
+                @show size(data[trainⱼ[j], tmpvars])
+                @show (lrn, task, data[trainⱼ[j], tmpvars])
                 modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], tmpvars])
                 preds = predictᵧ(modelᵧ, data=data[testⱼ[j],tmpvars], task=task)
                 score = measure( data[testⱼ[j], task.target], preds)
