@@ -25,7 +25,6 @@ function makeLibsvm(learner::Learner, task::Task, data)
         end
     end
     # delete!(parameters, :svmtype)
-    parameters[:svmtype] = SVC
     MLRModel(learner.parameters["svmtype"], parameters, inplace=false)
 end
 
