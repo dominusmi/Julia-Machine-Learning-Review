@@ -128,6 +128,7 @@ end
     learning function, which must be defined separately for each model.
 """
 function learnᵧ(learner::Learner, task::Task, data)
+    MLRModel(learner, task, data)
     modelᵧ = MLRModel(learner, task, data)
     if modelᵧ.inplace
         learnᵧ!(modelᵧ, learner=learner, task=task, data=data)

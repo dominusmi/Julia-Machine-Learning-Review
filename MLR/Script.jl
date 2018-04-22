@@ -42,8 +42,18 @@ ps = ParametersSet([
     ),
     DiscreteParameter(
         name = "svmtype",
-        values = [SVC, NuSVC]
-    )
+        values = [SVC()]
+    ),
+    DiscreteParameter(
+        name = "kernel",
+        values = [Kernel.Polynomial]
+    ),
+    ContinuousParameter(
+        name = "coef0",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
 ])
 
 data = FakedataClassif(1000,3)

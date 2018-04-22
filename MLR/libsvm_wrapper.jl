@@ -5,26 +5,35 @@ using LIBSVM
 
 immutable LibSVM end
 
+
 function makeLibsvm(learner::Learner, task::Task, data)
     parameters = Dict()
     possible_parameters = Dict(
         :svmtype=>LIBSVM.AbstractSVC,
         :kernel=>Kernel.KERNEL,
         :degree=>Integer,
-        :cost=>Float64
+        :cost=>Float64,
+        :coef0=>Float64,
+        :nu=>Float64,
+        :epsilon=>Float64,
+        :tolerance=>Float64,
+        :probability=>Bool,
+        :verbose=>Bool
         # Many more to add but this will do for now
     )
     for (p_name, p_value) in learner.parameters
         p_symbol = Symbol(p_name)
         if get(possible_parameters, p_symbol, false) != false
             if !(typeof(p_value) <: possible_parameters[p_symbol])
-                throw("Parameter $p_name is not of the correct type:
-                        ($(possible_parameters[p_symbol]))")
+                throw("Parameter $p_name is not of the correct type: $p_value
+                        ($(typeof(p_value)) instead of $(possible_parameters[p_symbol]))")
             end
             parameters[p_symbol] = p_value
+        else
+            println("Parameter $p_name was not found and is therefore ignored")
         end
     end
-    # delete!(parameters, :svmtype)
+    parameters[:svmtype] = typeof(parameters[:svmtype])
     MLRModel(learner.parameters["svmtype"], parameters, inplace=false)
 end
 
