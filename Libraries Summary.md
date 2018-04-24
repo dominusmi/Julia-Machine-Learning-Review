@@ -61,15 +61,18 @@ A generic notebook discussing decision tree models is available [here](Scouting/
 - _MLLabelUtils_ provides functions to modify the labels to be compatible with whatever the algorithm requires. For instance transform into categorical, booleans, from text to number etc
 - MLBase provides function for label encoding, classification from model scores, performance evaluation (ROC, F1 etc),
   cross-validation (Kfold, stratified Kfold, subsmapling), and grid search hyperparameter tuning.
+- MLMetrics provides model evaluation functions for regression, classification, multilabel ranking, and clustering designed
+to follow python's sklearn.metrics closely.
 
 
 
-|                       | [MLPreprocessing.jl](Scouting/MLPreprocessing.ipynb) | [MLLabelUtils.jl](Scouting/MLLabelUtils.ipynb) | [MLBase.jl](Scouting/MLBase.jl.ipynb)|
-| :- | :- | :- | :- |
-| Packages works            | yes | yes | yes|
-| Deprecation warnings      | None | No |No|
-| Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |If tables transformed into arrays|
-| Contains Documetation     | No, but sufficient examples | yes |yes|
-| Simplicity                | Fair | good |good|
+
+|                       | [MLPreprocessing.jl](Scouting/MLPreprocessing.ipynb) | [MLLabelUtils.jl](Scouting/MLLabelUtils.ipynb) | [MLBase.jl](Scouting/MLBase.jl.ipynb)| [MLMetrics.jl](Scouting/MLMetrics.ipynb)|
+| :- | :- | :- | :- | :- |
+| Packages works            | yes | yes | yes|yes|
+| Deprecation warnings      | None | No |No|yes|
+| Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |If tables transformed into arrays|yes|
+| Contains Documetation     | No, but sufficient examples | yes |yes|no|
+| Simplicity                | Fair | good |good|good|
 
 
