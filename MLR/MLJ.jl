@@ -11,7 +11,7 @@ using SparseRegression
 """
 immutable Task{T}
     _type::T
-    target::Int
+    targets::Union{Array{<:Integer}, Integer}
     features::Array{Int}
 end
 
@@ -30,7 +30,7 @@ function Task(;task_type="regression", target=nothing, data=nothing)
     # Finds the right type (classification or regression)
     TaskType = Symbol(titlecase(lowercase(task_type))*"Task")
     TaskType = getfield(Main, TaskType)
-    
+
     Task(TaskType(), target, features)
 end
 

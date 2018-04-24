@@ -7,14 +7,14 @@ include("decisiontree_wrapper.jl")
 
 # Decision trees example
 
-# data = FakedataClassif(1000,3)
-#
-# task = Task(task_type="classification", target=4, data=data)
-# lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
-#
-# modelᵧ = makeForest(lrn, task, data)
-# modelᵧ = learnᵧ(modelᵧ, learner=lrn, data=data, task=task)
-# predictᵧ(modelᵧ, data=data, task=task)
+data = FakedataClassif(1000,3)
+
+task = Task(task_type="classification", target=4, data=data)
+lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
+
+modelᵧ = makeForest(lrn, task, data)
+modelᵧ = learnᵧ(modelᵧ, learner=lrn, data=data, task=task)
+predictᵧ(modelᵧ, data=data, task=task)
 
 
 ## Example regression using GLM with penalty and λ tuning

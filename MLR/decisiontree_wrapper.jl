@@ -74,7 +74,7 @@ function learnᵧ(modelᵧ::MLRModel{<:Node}; learner=nothing::Learner, data=not
     # TODO: add pruning
 
     train = data[:,task.features]
-    target = data[:,task.target]
+    target = data[:,task.target[1]]
 
     tree = build_tree(target, train, modelᵧ.parameters...)
 
@@ -92,9 +92,9 @@ function learnᵧ(modelᵧ::MLRModel{<:DecisionForestᵧ}; learner=nothing::Lear
     # TODO: add pruning
 
     train = data[:,task.features]
-    target = data[:,task.target]
+    targets = data[:,task.targets]
 
-    forest = build_forest(target, train, modelᵧ.parameters...)
+    forest = build_forest(targets, train, modelᵧ.parameters...)
 
     MLRModel(forest, modelᵧ.parameters)
 end
