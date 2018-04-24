@@ -9,21 +9,29 @@ using SparseRegression
     and the columns to use as target and as features.
     TODO: accept multiple targets
 """
-immutable Task
-    task_type::String
+immutable Task{T}
+    _type::T
     target::Int
     features::Array{Int}
 end
+
+immutable RegressionTask end
+immutable ClassificationTask end
 
 function Task(;task_type="regression", target=nothing, data=nothing)
     if target == nothing || data == nothing
         throw("Requires target and data to be set")
     end
 
+    # reshapes features without target
     features = size(data,2)
     features = deleteat!( collect(1:features), target)
 
-    Task(task_type, target, features)
+    # Finds the right type (classification or regression)
+    TaskType = Symbol(titlecase(lowercase(task_type))*"Task")
+    TaskType = getfield(Main, TaskType)
+    
+    Task(TaskType(), target, features)
 end
 
 """

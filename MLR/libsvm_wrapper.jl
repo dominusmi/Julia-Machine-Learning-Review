@@ -3,9 +3,7 @@ using LIBSVM
 # model = svmtrain(train,train_targets,probability=true)   #train the classifier (default: radial basis kernel)
 # (predicted_labels, decision_values) = svmpredict(model, test);
 
-
-function makeLibsvm(learner::Learner, task::Task, data)
-    parameters = Dict()
+function getParamsLibsvm()
     possible_parameters = Dict(
         :svmtype=>LIBSVM.AbstractSVC,
         :kernel=>Kernel.KERNEL,
@@ -19,6 +17,13 @@ function makeLibsvm(learner::Learner, task::Task, data)
         :verbose=>Bool
         # Many more to add but this will do for now
     )
+    possible_parameters
+end
+
+function makeLibsvm(learner::Learner, task::Task, data)
+    parameters = Dict()
+    possible_parameters = getParamsLibsvm()
+    
     for (p_name, p_value) in learner.parameters
         p_symbol = Symbol(p_name)
         if get(possible_parameters, p_symbol, false) != false
@@ -42,7 +47,7 @@ end
 
 function learnᵧ(modelᵧ::MLRModel{<:LIBSVM.AbstractSVC}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
     train = data[:, task.features]'
-    targets = data[:,task.target]
+    targesvmtraints = data[:,task.target]
 
     model = svmtrain(train,targets; modelᵧ.parameters...)
     modelᵧ = MLRModel(model, modelᵧ.parameters)
