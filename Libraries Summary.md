@@ -11,6 +11,22 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 | Simplicity | good | good | High |
 
 
+### Gradient Boosting
+
+A notebook detailing boosting and gradient boosting is available [here](Scouting/Boosting.ipynb).
+  
+- LightGMB.jl a Julia interface for Microsoft's LightGBM
+- XGBoost.jl an interface fo XGBoost (written in C)
+- A Julia implementation of gradient boosting
+
+
+|   | [LightGBM.jl](Scouting/LightGBM.jl.ipynb) |  [XGBoost.jl](Scouting/XGBoost.jl.ipynb) | [GradientBoost.jl](Scouting/GradientBoost.jl.ipynb) |
+| :-: | :-: | :-: | :-: |
+| Packages works            | no                               | Yes | No
+| Deprecation warnings      | None                              | None | Several
+| Compatible with JuliaDB   | Yes (transformation of tables to arrays required) | - |
+| Contains Documetation     | No            | Points to XGBoost docs | No, few examples |
+
 
 ### Decision Trees
 
