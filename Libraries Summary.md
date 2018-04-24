@@ -19,7 +19,7 @@ A generic notebook discussing decision tree models is available [here](Scouting/
 - DecisionTrees.jl was found to be about one order of magnitude slower than the python version
 - OnlineStats only has an implementation for a type of tree called FastTree (and its ensemble, the FastForest)
 
-|   | [DecisionTrees.jl](Scouting/DecisionTree.ipynb) |  [ScikitLearn.jl](Scouting/ScikitLearn.jl.ipynb) | OnlineStats.jl |
+|   | [DecisionTrees.jl](Scouting/DecisionTree.ipynb) |  [ScikitLearn.jl](Scouting/ScikitLearn.jl.ipynb) | [OnlineStats.jl](Scouting/OnlineStats.ipynb) |
 | :-: | :-: | :-: | :-: |
 | Packages works            | yes                               | Yes | Yes
 | Deprecation warnings      | None                              | Some | None
