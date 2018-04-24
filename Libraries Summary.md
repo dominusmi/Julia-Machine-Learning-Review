@@ -10,6 +10,18 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 | Contains documentation | yes, but not great | very good | Yes, mostly very good |
 | Simplicity | good | good | High |
 
+### SVM
+
+Theory on support vector machines is found [here](Scouting/SupportVectorMachinesTheory.ipynb)
+
+|        | [KSVM.jl](Scouting/KSVM.jl.ipynb) |  [LIBSVM.jl](Scouting/LIBSVM.jl.ipynb) | [SVM.jl](Scouting/SVM.jl.ipynb) |
+| ------------- |:-------------:|:-------------:|:-:|
+| Package works | no | yes | no |
+| Deprecations warnings      | yes | No | yes |
+| - | If transformed into matrix | yes | - |
+| Contains documentation | no | yes, as inline documentation. Type ?Functionname | no |
+| Simplicity | good | medium | good |
+
 
 ### Gradient Boosting
 
