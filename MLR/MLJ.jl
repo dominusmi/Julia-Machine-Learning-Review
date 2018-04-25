@@ -106,6 +106,16 @@ end
 getindex(p::ParametersSet, i::Int64) = p.parameters[i]
 
 """
+    Structure used to record results of tuning
+"""
+mutable struct MLRStorage
+    models::Array
+    measures::Array{<:Float64}
+    parameters::Array{<:Dict}
+    MLRStorage() = ([],[],[])
+end
+
+"""
     Abstraction layer for model
 """
 immutable MLRModel{T}
