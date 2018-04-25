@@ -1,24 +1,34 @@
 include("MLJ.jl")
 include("Tuning.jl")
-include("glm_wrapper.jl")
-include("libsvm_wrapper.jl")
-include("decisiontree_wrapper.jl")
 
 
 # Decision trees example
 
-data = FakedataClassif(1000,3)
+# include("decisiontree_wrapper.jl")
+# data = FakedataClassif(1000,3)
+#
+# task = Task(task_type="classification", target=4, data=data)
+# lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
+#
+# modelᵧ = learnᵧ(learner, task, data)
+# predictᵧ(modelᵧ, data=data, task=task)
 
-task = Task(task_type="classification", target=4, data=data)
-lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
+# Multivariate example
 
-modelᵧ = makeForest(lrn, task, data)
-modelᵧ = learnᵧ(modelᵧ, learner=lrn, data=data, task=task)
+include("multivariate_wrapper.jl")
+data = Fakedata(1000,4)
+
+task = Task(task_type="regression", target=[3], data=data)
+lrn = Learner("multivariate", Dict("regType"=>"llsq"))
+
+modelᵧ = learnᵧ(lrn, task, data)
 predictᵧ(modelᵧ, data=data, task=task)
+
 
 
 ## Example regression using GLM with penalty and λ tuning
 
+# include("glm_wrapper.jl")
 # ps = ParametersSet([
 #     ContinuousParameter(
 #         name = "cost",
@@ -45,7 +55,7 @@ predictᵧ(modelᵧ, data=data, task=task)
 
 ## Example classification using SVM with type and cost tuning
 
-
+# include("libsvm_wrapper.jl")
 # ps = ParametersSet([
 #     ContinuousParameter(
 #         name = "cost",
