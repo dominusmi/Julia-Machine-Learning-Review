@@ -109,10 +109,10 @@ getindex(p::ParametersSet, i::Int64) = p.parameters[i]
     Structure used to record results of tuning
 """
 mutable struct MLRStorage
-    models::Array
-    measures::Array{<:Float64}
-    parameters::Array{<:Dict}
-    MLRStorage() = ([],[],[])
+    models::Array{<:Any,1}
+    measures::Array{<:Any,1}
+    parameters::Array{<:Dict,1}
+    MLRStorage() = new(Array{String}(0),[],Array{Dict}(0))
 end
 
 """
@@ -154,19 +154,5 @@ function learnᵧ(learner::Learner, task::Task, data)
     modelᵧ
 end
 
-#### UTILITIES ####
-function Fakedata(N,d)
-    n_obs = 100
-    x = randn((n_obs,d))
-    y = sum(x*randn(d),2)
-
-    hcat(x,y)
-end
-
-function FakedataClassif(N,d)
-    n_obs = 100
-    x = randn((n_obs,d))
-    y = ( sum(x*randn(d),2) .> mean(sum(x*randn(d),2)) )
-
-    hcat(x,y)
-end
+include("Storage.jl")
+include("Utilities.jl")

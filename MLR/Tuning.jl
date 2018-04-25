@@ -116,17 +116,19 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
         # Get training/testing validation sets
         trainⱼ, testⱼ = get_samples(sampler, n_obs)
 
-        scores = []
+        measures = []
         for j in 1:length(trainⱼ)
             modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], :])
             preds, prob = predictᵧ(modelᵧ, data_features=data[testⱼ[j],task.features], task=task)
 
-            score = measure( data[testⱼ[j], task.targets], preds)
-            push!(scores, score)
+            _measure = measure( data[testⱼ[j], task.targets], preds)
+            push!(measures, _measure)
         end
+        # Store and print cross validation results
+        store_results!(storage, measures, lrn)
         println("Trained:")
         println(lrn)
-        println("Average CV accuracy: $(mean(scores))\n")
+        println("Average CV accuracy: $(mean(measures))\n")
 
         update_parameters!(prms_value, prms_range)
 
