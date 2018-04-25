@@ -1,7 +1,6 @@
 include("MLJ.jl")
 include("Tuning.jl")
 
-
 # Decision trees example
 
 # include("decisiontree_wrapper.jl")
@@ -10,19 +9,19 @@ include("Tuning.jl")
 # task = Task(task_type="classification", target=4, data=data)
 # lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
 #
-# modelᵧ = learnᵧ(learner, task, data)
-# predictᵧ(modelᵧ, data=data, task=task)
+# modelᵧ = learnᵧ(lrn, task, data)
+# predictᵧ(modelᵧ, data_features=data, task=task)
 
 # Multivariate example
 
-include("multivariate_wrapper.jl")
-data = Fakedata(1000,4)
-
-task = Task(task_type="regression", target=[3], data=data)
-lrn = Learner("multivariate", Dict("regType"=>"llsq"))
-
-modelᵧ = learnᵧ(lrn, task, data)
-predictᵧ(modelᵧ, data=data, task=task)
+# include("multivariate_wrapper.jl")
+# data = Fakedata(1000,4)
+#
+# task = Task(task_type="regression", target=[3], data=data)
+# lrn = Learner("multivariate", Dict("regType"=>"llsq"))
+#
+# modelᵧ = learnᵧ(lrn, task, data)
+# predictᵧ(modelᵧ, data=data, task=task)
 
 
 
@@ -50,7 +49,7 @@ predictᵧ(modelᵧ, data=data, task=task)
 # tune(learner=lrn, task=task, data=data, parameters_set=ps,
 #     measure=mean_squared_error)
 
-# variable_select_forward(learner=lrn, task=task, data=data, measure=mean_squared_error)
+
 
 
 ## Example classification using SVM with type and cost tuning

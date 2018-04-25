@@ -60,6 +60,6 @@ function predictᵧ(modelᵧ::MLRModel{<:MultivariateModel};
 
     sol = modelᵧ.model.sol
     A, b = sol[1:end-1,:], sol[end,:][:,:]
-    preds = data * A .+ b'
+    preds = data_features * A .+ b'
     preds
 end

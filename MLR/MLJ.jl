@@ -1,8 +1,7 @@
 import StatsBase: predict
 import Base: getindex, show
 import MLBase: Kfold, fit!, predict
-using MLMetrics
-using SparseRegression
+import MLMetrics: mean_squared_error
 
 """
     Contains task type (regression,classification,..)
@@ -136,7 +135,6 @@ end
     learning function, which must be defined separately for each model.
 """
 function learnᵧ(learner::Learner, task::Task, data)
-    MLRModel(learner, task, data)
     modelᵧ = MLRModel(learner, task, data)
     if modelᵧ.inplace
         learnᵧ!(modelᵧ, learner=learner, task=task, data=data)

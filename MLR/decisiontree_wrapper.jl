@@ -34,6 +34,8 @@ end
 immutable DecisionForestᵧ end
 
 function makeForest(lrn::Learner, task::Task, data)
+    lprms = copy(lrn.parameters)
+
     parameters = []
 
     possible_names = ["maxlabels", "partialsampling", "maxdepth"]
@@ -43,29 +45,29 @@ function makeForest(lrn::Learner, task::Task, data)
         "maxdepth"=>Integer
     )
 
-    if get(lrn.parameters, "nsubfeatures", false ) == false || get(lrn.parameters, "ntrees", false ) == false
+    if get(lprms, "nsubfeatures", false ) == false || get(lprms, "ntrees", false ) == false
         throw("nsubfeatures and ntrees must be set")
     end
 
-    push!(parameters, lrn.parameters["nsubfeatures"], lrn.parameters["ntrees"])
-    delete!(lrn.parameters, "nsubfeatures")
-    delete!(lrn.parameters, "ntrees")
+    push!(parameters, lprms["nsubfeatures"], lprms["ntrees"])
+    delete!(lprms, "nsubfeatures")
+    delete!(lprms, "ntrees")
 
 
-    for (i, (name, value)) in enumerate(lrn.parameters)
+    for (i, (name, value)) in enumerate(lprms)
         if possible_names[i] == name
-            if typeof(lrn.parameters[name]) <: possible_parameters[name]
+            if typeof(lprms) <: possible_parameters[name]
                 push!(parameters, lrn.parameters[name])
             end
         else
-            if i !== length(lrn.parameters)
+            if i !== length(lprms)
                 warn("DT requires that you provide maxlabels to be to set partialsampling"*
                       "and that you provide nsubfeatures to be able to set maxdepth."*
                       "parameter $(name) was therefore not set")
             end
         end
     end
-    MLRModel(DecisionForestᵧ(), parameters)
+    MLRModel(DecisionForestᵧ(), parameters, inplace=false)
 end
 
 
@@ -81,7 +83,8 @@ function learnᵧ(modelᵧ::MLRModel{<:Node}; learner=nothing::Learner, data=not
     MLRModel(tree, modelᵧ.parameters)
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Node}; data=data, task=task)
+function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Node};
+                     data_features=nothing::Matrix, task=nothing::Task)
     probs = apply_tree(modelᵧ.model, data[:,task.features])
     preds = [p>0.5?1:0 for p in probs]
     preds, probs
@@ -99,8 +102,9 @@ function learnᵧ(modelᵧ::MLRModel{<:DecisionForestᵧ}; learner=nothing::Lear
     MLRModel(forest, modelᵧ.parameters)
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Ensemble}; data=data, task=task)
-    probs = apply_forest(modelᵧ.model, data[:,task.features])
+function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Ensemble};
+                    data_features=nothing::Matrix, task=nothing::Task)
+    probs = apply_forest(modelᵧ.model, data_features)
     preds = [p>0.5?1:0 for p in probs]
     preds, probs
 end

@@ -14,11 +14,11 @@ using SparseRegression
 """
 function makeRidge(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.target])
+        model = SModel(data[:, task.features], data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.target],
+        model = SModel(data[:, task.features], data[:, task.targets],
                         L2DistLoss(), L2Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
@@ -26,11 +26,11 @@ end
 
 function makeLasso(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.target])
+        model = SModel(data[:, task.features], data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.target],
+        model = SModel(data[:, task.features], data[:, task.targets],
                         L2DistLoss(), L1Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
@@ -38,11 +38,11 @@ end
 
 function makeElasticnet(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.target])
+        model = SModel(data[:, task.features], data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.target],
+        model = SModel(data[:, task.features], data[:, task.targets],
                         L2DistLoss(), ElasticNetPenalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
@@ -50,7 +50,7 @@ end
 
 function makeGlm(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.target])
+        model = SModel(data[:, task.features], data[:, task.targets])
     else
         parameters = []
         if get(learner.parameters, "λ", false) !== false
@@ -65,7 +65,7 @@ function makeGlm(learner::Learner, task::Task, data)
             # Add penalty
             push!(parameters, learner.parameters["loss"])
         end
-        model = SModel(data[:, task.features], data[:, task.target], parameters...)
+        model = SModel(data[:, task.features], data[:, task.targets], parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -87,8 +87,9 @@ end
 """
     How to predict using a specific model
 """
-function predictᵧ(modelᵧ::MLRModel{<:SModel}; data=data, task=task)
-    p = predict(modelᵧ.model, data[:, task.features])
+function predictᵧ(modelᵧ::MLRModel{<:SModel};
+                    data_features=nothing::Matrix, task=nothing::Task)
+    p = predict(modelᵧ.model, data_features)
     p, nothing
 end
 

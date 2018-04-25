@@ -103,9 +103,9 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
         scores = []
         for j in 1:length(trainⱼ)
             modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], :])
-            preds, prob = predictᵧ(modelᵧ, data=data[testⱼ[j],:], task=task)
+            preds, prob = predictᵧ(modelᵧ, data_features=data[testⱼ[j],task.features], task=task)
 
-            score = measure( data[testⱼ[j], task.target], preds)
+            score = measure( data[testⱼ[j], task.targets], preds)
             push!(scores, score)
         end
         println("Trained:")
