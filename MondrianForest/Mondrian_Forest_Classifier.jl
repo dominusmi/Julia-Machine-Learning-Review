@@ -41,7 +41,7 @@ function train!(Tree::Mondrian_Tree,
                 X::Array{Float64,2},
                 Y::Array{Int64},λ=1e9)
     Sample_Mondrian_Tree!(Tree,λ,X,Y)
-    initialize_posterior_counts!(Tree,X,Y)
+    #initialize_posterior_counts!(Tree,X,Y)
     compute_predictive_posterior_distribution!(Tree,10*size(X,2))
 end
 function predict!(Tree::Mondrian_Tree,X::Array{Float64,2})

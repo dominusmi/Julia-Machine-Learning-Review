@@ -16,6 +16,7 @@ type Mondrian_Node
     tab::Array{Int}                 # tables serving dish k Chinese restaurant process (CRP)
     c::Array{Int}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
     Gₚ::Array{Float64}              # posterior mean (predictive probability)
+    indices::Array{Int64}
 end
 
 # construction
@@ -31,7 +32,8 @@ function Mondrian_Node(τ::Float64, node_type::Array{Bool,1})
                       Nullable{Axis_Aligned_Box}(),
                       Array{Int}(),
                       Array{Int}(),
-                      Array{Float64}(),)
+                      Array{Float64}(),
+                      Array{Int64}())
     return N
 end
 
@@ -49,6 +51,14 @@ function Mondrian_Tree(N::Mondrian_Node)
     return Mondrian_Tree(N,Array{Mondrian_Node,1}())
 end
 
+function get_count(j::Mondrian_Node, Y::Array{Int64}, class_num::Int64)
+    j.tab = zeros(class_num)
+    j.c = zeros(class_num)
+    for i in 1:class_num
+        j.c[i] = length(Y[Y.==i])
+        j.tab[i] = min(j.c[i],1)
+    end
+end
 
 function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
                                λ::Float64,
@@ -59,17 +69,17 @@ function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(X))
     e.Θ = Θ
-    e.tab = zeros(size(unique(Y),1))
-    e.c = zeros(size(unique(Y),1))
+    get_count(e,Y, length(unique(Y)))
     e.Gₚ = zeros(size(unique(Y),1))
-    Sample_Mondrian_Block!(e, Θ, λ, Tree, X)
+    Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y)
 end
 
 function Sample_Mondrian_Block!(j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
                                 λ::Float64,
                                 Tree::Mondrian_Tree,
-                                X::Array{Float64,2})
+                                X::Array{Float64,2},
+                                Y::Array{Int64})
     # sample the time
     E = rand(Exponential(1/Linear_dimension(Θ)))
     if j.node_type[3]==true
@@ -101,22 +111,20 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
             right.parent = j
             # data changes A2 -> lines 8,9,10
             right.Θ = Θᴿ
-            right.tab = zeros(size(j.tab))
-            right.c = zeros(size(j.tab))
+            get_count(right, Y[Xᴿ], length(j.c))
             right.Gₚ=zeros(size(j.c,1))
             j.right = right
 
             left = Mondrian_Node(0.0, [true,false,false])
             left.parent = j
             left.Θ = Θᴸ
-            left.tab = zeros(size(j.tab))
-            left.c = zeros(size(j.tab))
+            get_count(left, Y[Xᴸ], length(j.c))
             left.Gₚ = zeros(size(j.c,1))
             j.left = left
 
             # recurse
-            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, X[Xᴸ,:])
-            Sample_Mondrian_Block!(right,get(right.Θ),λ, Tree, X[Xᴿ,:])
+            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, X[Xᴸ,:], Y[Xᴸ])
+            Sample_Mondrian_Block!(right,get(right.Θ),λ, Tree, X[Xᴿ,:], Y[Xᴿ])
         # set j as a leaf for no data/ not binary
         else
             j.τ = λ
@@ -133,6 +141,7 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
     end
 end
 
+# only check indices against the changed dimension CF lines 93-97
 function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2}, dim::Int64)
     # this function cause large memory allocation according
     # to @time but the system does not record any
