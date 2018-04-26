@@ -4,7 +4,7 @@
 using Distributions
 # for mondrian process
 include("Axis_Aligned_Box.jl");
-type Mondrian_Node
+mutable struct Mondrian_Node
     parent::Nullable{Mondrian_Node}
     left::Nullable{Mondrian_Node}
     right::Nullable{Mondrian_Node}
@@ -16,7 +16,7 @@ type Mondrian_Node
     tab::Array{Int}                 # tables serving dish k Chinese restaurant process (CRP)
     c::Array{Int}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
     Gₚ::Array{Float64}              # posterior mean (predictive probability)
-    indices::Array{Int64}
+    indices::Array{Int64}           # stores relevant data points dependent on Θ
 end
 
 # construction
@@ -38,7 +38,7 @@ function Mondrian_Node(τ::Float64, node_type::Array{Bool,1})
 end
 
 # only really need leaves + root directly
-type Mondrian_Tree
+mutable struct Mondrian_Tree
     root::Nullable{Mondrian_Node}
     leaves::Array{Mondrian_Node,1}
 end

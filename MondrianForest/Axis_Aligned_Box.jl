@@ -3,7 +3,7 @@ using Distributions
 # stores a series of D intervals
 # representing
 # [a₁,b₁]x[a₂,b₂]x⋯x[a_D, b_D]
-immutable Axis_Aligned_Box
+mutable struct Axis_Aligned_Box
     Intervals::AbstractArray{Float64,2}
     D::Int
 end
