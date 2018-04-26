@@ -9,7 +9,7 @@ immutable Axis_Aligned_Box
 end
 
 # constructor with intervals
-function Axis_Aligned_Box(Intervals)
+function Axis_Aligned_Box(Intervals::Array{Float64,2})
     Θ = Axis_Aligned_Box(Intervals, size(Intervals,1))
     return Θ
 end
@@ -34,7 +34,7 @@ end
 # [l₁,u₁],…,[l_D, u_D]
 # of the dimesion wise
 # min and max of the data
-function get_intervals(X)
+function get_intervals(X::Array{Float64,2})
     intervals = zeros(size(X,2),2)
     for i in 1:size(X,2)
         l = minimum(X[:,i])
@@ -47,7 +47,7 @@ end
 # samples a dimension d and
 # location of split in d from
 # a set of upper-lower intervals
-function sample_split_dimension(Θ)
+function sample_split_dimension(Θ::Axis_Aligned_Box)
     p_k = zeros(Θ.D)
     for i in 1:Θ.D
         p_k[i] = Θ.Intervals[i,2]-Θ.Intervals[i,1]

@@ -3,7 +3,7 @@ include("Mondrian_Tree.jl")
 type Mondrian_Tree_Classifier
     Tree::Mondrian_Tree
     λ::Float64
-    γ::Float64
+    γ::Real
     X::Array{Float64,2}
     Y::Array{Int}
 end
@@ -16,8 +16,11 @@ function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,λ::Float64)
     return Mondrian_Tree_Classifier(Tree,λ,0,[],[])
 end
 
-function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,λ::Float64, Data)
-    return Mondrian_Tree_Classifier(Tree,λ,0,[],[])
+function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,
+                                  λ::Float64,
+                                  X::Array{Float64,2},
+                                  Y::Array{Int64})
+    return Mondrian_Tree_Classifier(Tree,λ,0,X,Y)
 end
 
 type Mondrian_Forest_Classifier
@@ -34,15 +37,17 @@ function Mondrian_Forest_Classifier(n_trees::Int64)
                                     Array{Int}(0))
 end
 
-function train!(MT::Mondrian_Tree,X,Y,λ=1e9)
-    Sample_Mondrian_Tree!(MT,λ,(X,Y))
-    initialize_posterior_counts!(MT,(X,Y))
-    compute_predictive_posterior_distribution!(MT,10*size(X,2))
+function train!(Tree::Mondrian_Tree,
+                X::Array{Float64,2},
+                Y::Array{Int64},λ=1e9)
+    Sample_Mondrian_Tree!(Tree,λ,X,Y)
+    initialize_posterior_counts!(Tree,X,Y)
+    compute_predictive_posterior_distribution!(Tree,10*size(X,2))
 end
-function predict!(MT::Mondrian_Tree,X)
+function predict!(Tree::Mondrian_Tree,X::Array{Float64,2})
     pred = []
     for i in 1:size(X,1)
-        p = predict!(MT,X[i,:],10*size(X,2))
+        p = predict!(Tree,X[i,:],10*size(X,2))
         if p[1] > p[2]
             push!(pred,1)
         else
@@ -52,15 +57,19 @@ function predict!(MT::Mondrian_Tree,X)
     return pred
 end
 
-function train!(MF::Mondrian_Forest_Classifier, X, Y, λ)
+function train!(MF::Mondrian_Forest_Classifier,
+                X::Array{Float64,2},
+                Y::Array{Int64},
+                λ::Real)
     for i in 1:MF.n_trees
-        T = Mondrian_Tree()
-        train!(T, X, Y, λ)
-        push!(MF.Trees,T)
+        Tree = Mondrian_Tree()
+        train!(Tree, X, Y, λ)
+        push!(MF.Trees,Tree)
     end
 end
 
-function predict!(MF::Mondrian_Forest_Classifier, X)
+function predict!(MF::Mondrian_Forest_Classifier,
+                  X::Array{Float64,2})
     pred = zeros(MF.n_trees,size(X,1))
     for i in 1:length(MF.Trees)
         pred[i,:] = predict!(MF.Trees[i], X)
