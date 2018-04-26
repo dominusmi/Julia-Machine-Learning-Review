@@ -93,8 +93,8 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
         Θᴸ.Intervals[d,2]=x
         Θᴿ.Intervals[d,1]=x
         # check there is actually data here
-        Xᴿ = get_data_indices(Θᴿ,X)
-        Xᴸ = get_data_indices(Θᴸ,X)
+        Xᴿ = get_data_indices(Θᴿ,X,d)
+        Xᴸ = get_data_indices(Θᴸ,X,d)
         # strictly binary tree
         if (size(Xᴿ,1)>0 && size(Xᴸ,1)>0)
             right = Mondrian_Node(0.0, [true,false,false])
@@ -133,6 +133,19 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
     end
 end
 
+function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2}, dim::Int64)
+    # this function cause large memory allocation according
+    # to @time but the system does not record any
+    # large memory allocation -> ram does not get increased
+    # at all!
+    indices = []
+    for i in 1:size(X,1)
+        if !(X[i,dim] < Θ.Intervals[dim,1] || X[i,dim] > Θ.Intervals[dim,2])
+            push!(indices,i)
+        end
+    end
+    return indices
+end
 # returns any data from D contained in the boxes of Θ
 function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2})
     # this function cause large memory allocation according
