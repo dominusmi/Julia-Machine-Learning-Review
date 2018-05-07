@@ -2,10 +2,10 @@ include("Mondrian_Tree.jl")
 
 mutable struct Mondrian_Tree_Classifier
     Tree::Mondrian_Tree
-    λ::Float64
-    γ::Real
-    X::Array{Float64,2}
-    Y::Array{Int}
+    λ::Float64                              # lifetime parameter set to inf in paper and 1e9 in implementations (e.g pythons)
+    γ::Real                                 # Hierachy of normailized stable processes discount parameter 10*Dimensionality of data in the paper
+    X::Array{Float64,2}                     # training data
+    Y::Array{Int}                           # training labels
 end
 
 function Mondrian_Tree_Classifier(Tree::Mondrian_Tree)
@@ -23,8 +23,8 @@ function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,
     return Mondrian_Tree_Classifier(Tree,λ,0,X,Y)
 end
 
-mutable struct Mondrian_Forest_Classifier
-    n_trees::Int64
+mutable struct Mondrian_Forest_Classifier   # currently trees in the forest just use default params same as in the paper
+    n_trees::Int64                          # number of trees in the forest
     Trees::Array{Mondrian_Tree}
     X::Array{Float64,2}
     Y::Array{Int}
@@ -41,10 +41,11 @@ function train!(Tree::Mondrian_Tree,
                 X::Array{Float64,2},
                 Y::Array{Int64},λ=1e9)
     Sample_Mondrian_Tree!(Tree,λ,X,Y)
-    #initialize_posterior_counts!(Tree,X,Y)
-    compute_predictive_posterior_distribution!(Tree,10*size(X,2))
+    compute_predictive_posterior_distribution!(Tree,10*size(X,2))   # TODO get rid of this override
 end
-function predict!(Tree::Mondrian_Tree,X::Array{Float64,2})
+
+function predict!(Tree::Mondrian_Tree,      # batch prediction NB supposedly can change tree structure!
+                  X::Array{Float64,2})
     pred = []
     for i in 1:size(X,1)
         p = predict!(Tree,X[i,:],10*size(X,2))

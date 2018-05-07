@@ -182,49 +182,6 @@ function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2})
     return indices
 end
 
-# counts the proportion of each label in
-# the data contained within the leaf nodes
-# Θ
-function initialize_posterior_leaf_counts!(Tree::Mondrian_Tree,
-                                           X::Array{Float64,2},
-                                           Y::Array{Int64})
-    for leaf in Tree.leaves
-        indices = get_data_indices(get(leaf.Θ),X)
-        if length(indices)>0
-            y = Y[indices]
-            for k in 1:length(leaf.c)
-                leaf.c[k] = length(y[y.==k])
-                leaf.tab[k] = min(leaf.c[k],1)
-            end
-        end
-    end
-end
-
-# uses the leaf node counts to get the internal node counts
-function initialize_posterior_counts!(Tree::Mondrian_Tree,
-                                      X::Array{Float64,2},
-                                      Y::Array{Int64})
-    initialize_posterior_leaf_counts!(Tree,X,Y)
-    for leaf in Tree.leaves
-        j = leaf
-        while true
-            if j.node_type[2]==false
-                for k in 1:length(j.c)
-                    j.c[k] = get(j.left).tab[k]+get(j.right).tab[k]
-                end
-            end
-            for k in 1:length(j.c)
-                j.tab[k] = min(j.c[k],1)
-            end
-            if j.node_type[3]==true
-                break
-            else
-                j = get(j.parent)
-            end
-        end
-    end
-end
-
 # gamma is usually set to 10*dimensionality
 # which is done above somewhere
 function compute_predictive_posterior_distribution!(Tree::Mondrian_Tree,
