@@ -128,7 +128,7 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
 
             # recurse
             Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, X[Xᴸ,:], Y[Xᴸ])
-            Sample_Mondrian_Block!(right,get(right.Θ),λ, Tree, X[Xᴿ,:], Y[Xᴿ])
+            Sample_Mondrian_Block!(right, get(right.Θ),λ, Tree, X[Xᴿ,:], Y[Xᴿ])
         # set j as a leaf for no data/ not binary
         else
             j.τ = λ
