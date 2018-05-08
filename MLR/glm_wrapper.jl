@@ -6,12 +6,26 @@ using SparseRegression
     Functions specifying how model should be constructed given parameters
     These function are completely model dependent and are the only ones
     that need to be written to add a new model to the list.
-
-    TODO:
-    - Add more models
-    - Add functions specifying which parameter per model and what form they should take
-    - Make checks that parameters are of the type/form that they should
 """
+function get_parameters(model::MLRModel{<:SModel})
+    parameters = Dict(
+        "λ" => Dict(
+                    "type"=>Union{Float64, Array{Float64}},
+                    "desc"=>"Regularization constant. Small => strong regularization"
+                    ),
+        "penalty" => Dict(
+                    "type"=>LearnBase.Penalty,
+                    "desc"=>"Penalty to use. Any penalty from LearnBase.Penalty can be used"
+                    ),
+        "loss" => Dict(
+                    "type"=>LearnBase.Loss,
+                    "desc"=>"Loss to use. Any loss from LearnBase.Loss can be used"
+                    )
+    )
+    parameters
+end
+
+
 function makeRidge(learner::Learner, task::Task, data)
     if isempty(learner.parameters)
         model = SModel(data[:, task.features], data[:, task.targets])
@@ -53,19 +67,19 @@ function makeGlm(learner::Learner, task::Task, data)
         model = SModel(data[:, task.features], data[:, task.targets])
     else
         parameters = []
-        if get(learner.parameters, "λ", false) !== false
+        if get(learner.parameters, :λ, false) !== false
             # Add λ
             push!(parameters, get_λ(learner.parameters, task))
         end
-        if get(learner.parameters, "penalty", false) !== false
+        if get(learner.parameters, :penalty, false) !== false
             # Add penalty
-            push!(parameters, learner.parameters["penalty"])
+            push!(parameters, learner.parameters[:penalty])
         end
-        if get(learner.parameters, "loss", false) !== false
+        if get(learner.parameters, :loss, false) !== false
             # Add penalty
-            push!(parameters, learner.parameters["loss"])
+            push!(parameters, learner.parameters[:loss])
         end
-        model = SModel(data[:, task.features], data[:, task.targets], parameters...)
+        model = SModel(data[:, task.features], data[:, task.targets[1]], parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -74,10 +88,10 @@ end
 function get_λ(parameters, task::Task)
     if get(parameters, "λ", false) == false
         lambda = fill(0.0, task.features)
-    elseif typeof(parameters["λ"]) <: Real
-        lambda = fill(parameters["λ"], length(task.features) )
-    elseif typeof(parameters["λ"]) <: Vector{Float64}
-        lambda = copy(parameters["λ"])
+    elseif typeof(parameters["λ"]["type"]) <: Real
+        lambda = fill(parameters["λ"]["type"], length(task.features) )
+    elseif typeof(parameters["λ"]["type"]) <: Vector{Float64}
+        lambda = copy(parameters["λ"]["type"])
     end
     lambda
 end
