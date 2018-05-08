@@ -197,7 +197,7 @@ function compute_predictive_posterior_distribution!(Tree::Mondrian_Tree,
             p = get(j.parent).Gₚ
         end
         for k in 1:length(j.c)
-            j.Gₚ[k] = (1/(sum(j.c)))*(j.c[k]-d*j.tab[k]+sum(j.tab)*p[k])
+            j.Gₚ[k] = (1/(sum(j.c)))*(j.c[k]-d*j.tab[k]+d*sum(j.tab)*p[k])
         end
         if sum(j.node_type)==0
             break
@@ -256,7 +256,7 @@ function predict!(Tree::Mondrian_Tree,
             end
             jₓ.tab = jₓ.c
             for k in 1:length(jₓ.c)
-                jₓ.Gₚ[k] = 1/(sum(jₓ.c)+1)*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
+                jₓ.Gₚ[k] = 1/(sum(jₓ.c))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
             end
             for k in 1:length(s)
                 s[k] += not_sep*(1-pⱼ)*jₓ.Gₚ[k]
