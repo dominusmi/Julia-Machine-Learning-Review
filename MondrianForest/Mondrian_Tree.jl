@@ -76,6 +76,7 @@ function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
     get_count(e,Y, length(unique(Y)))
     e.Gₚ = zeros(size(unique(Y),1))
     Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y)
+    return Tree
 end
 
 function Sample_Mondrian_Block!(j::Mondrian_Node,
