@@ -8,12 +8,12 @@ plotlyjs()
 # plot(x,y, hover=(text))
 
 
-function plot_storage(storage::MLRStorage)
+function plot_storage(storage::MLRStorage; plotting_args=[])
     models = Set(storage.models)
-    markers = []
-    measures = []
-
+    fig = plot(;plotting_args...)
     for model in models
+        markers = []
+        measures = []
         indeces = []
         for (i, p_models) in enumerate(storage.models)
             if p_models == model
@@ -28,7 +28,7 @@ function plot_storage(storage::MLRStorage)
             end
             push!(markers, _marker)
         end
+        plot!(measures; hover=markers, label=model)
     end
-
-    plot(measures, hover=markers, label=models)
+    fig
 end

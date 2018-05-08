@@ -79,7 +79,6 @@ function prepare_parameters!(prms_set, prms_value, prms_range, discrete_prms_map
     total_parameters
 end
 
-
 """
     Tunes the model
 """
@@ -136,6 +135,17 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
     end
 end
 
+
+function tune(multiplex::MLRMultiplex; task=nothing::Task, data=nothing::Matrix{Real},
+    sampler=Resampling()::Resampling, measure=nothing::Function,
+    storage=nothing::Union{Void,MLRStorage})
+
+    for i in 1:multiplex.size
+        tune(learner=multiplex.learners[i], task=task, data=data, parameters_set=multiplex.parametersSets[i],
+            sampler=sampler, measure=measure, storage=storage)
+    end
+
+end
 
 """
     Tunes multiple models with multiple different paramters

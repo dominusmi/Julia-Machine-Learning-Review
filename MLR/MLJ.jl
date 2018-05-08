@@ -131,6 +131,15 @@ immutable MLRModel{T}
 end
 MLRModel(model, parameters; inplace=true) = MLRModel(model, parameters, inplace)
 
+
+immutable MLRMultiplex
+    learners::Array{Learner}
+    parametersSets::Array{ParametersSet}
+    size::Integer
+    MLRMultiplex(lrns::Array{Learner}, ps::Array{ParametersSet}) = new(lrns, ps, size(lrns,1))
+end
+
+
 #### ABSTRACT FUNCTIONS ####
 """
     Constructor for any model. Will call the function makeModelname, where

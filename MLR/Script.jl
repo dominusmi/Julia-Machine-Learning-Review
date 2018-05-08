@@ -1,6 +1,7 @@
 include("MLJ.jl")
 include("Tuning.jl")
 
+
 # Decision trees example
 
 # include("decisiontree_wrapper.jl")
@@ -27,33 +28,33 @@ include("Tuning.jl")
 
 ## Example regression using GLM with penalty and λ tuning
 
-include("glm_wrapper.jl")
-ps = ParametersSet([
-    ContinuousParameter(
-        name = "cost",
-        lower = -4,
-        upper = 1,
-        transform = x->10^x
-    ),
-    DiscreteParameter(
-        name = "penalty",
-        values = [L2Penalty(), L1Penalty()]
-    )
-])
+# include("glm_wrapper.jl")
+# ps = ParametersSet([
+#     ContinuousParameter(
+#         name = "cost",
+#         lower = -4,
+#         upper = 1,
+#         transform = x->10^x
+#     ),
+#     DiscreteParameter(
+#         name = "penalty",
+#         values = [L2Penalty(), L1Penalty()]
+#     )
+# ])
+#
+# data = Fakedata(1000,3)
+#
+# task = Task(task_type="classification", targets=[4], data=data)
+# lrn = Learner("glm")
+#
+# storage = MLRStorage()
+#
+# tune(learner=lrn, task=task, data=data, parameters_set=ps,
+#     measure=mean_squared_error, storage=storage)
+#
+# include("Visualisation.jl")
 
-data = Fakedata(1000,3)
-
-task = Task(task_type="classification", targets=[4], data=data)
-lrn = Learner("glm")
-
-storage = MLRStorage()
-
-tune(learner=lrn, task=task, data=data, parameters_set=ps,
-    measure=mean_squared_error, storage=storage)
-
-include("Visualisation.jl")
-
-plot_storage(storage)
+# plot_storage(storage)
 ## Example classification using SVM with type and cost tuning
 
 # include("libsvm_wrapper.jl")
@@ -87,3 +88,63 @@ plot_storage(storage)
 #
 # tune(learner=lrn, task=task, data=data, parameters_set=ps,
 #     measure=accuracy)
+
+
+# Multiplex example
+include("MLJ.jl")
+include("glm_wrapper.jl")
+include("multivariate_wrapper.jl")
+
+data = Fakedata(1000,4)
+task = Task(task_type="regression", targets=[3], data=data)
+
+lrns = Array{Learner}(0)
+psSet = Array{ParametersSet}(0)
+
+lrn = Learner("glm")
+ps = ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "penalty",
+        values = [L2Penalty(), L1Penalty()]
+    )
+])
+push!(lrns, lrn)
+push!(psSet, ps)
+
+lrn = Learner("multivariate")
+ps = ParametersSet([
+    DiscreteParameter(
+        name="regType",
+        values = ["llsq", "ridge"]
+    ),
+    ContinuousParameter(
+        name = "λ",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    )
+])
+push!(lrns, lrn)
+push!(psSet, ps)
+
+storage = MLRStorage()
+mp = MLRMultiplex(lrns, psSet)
+include("Tuning.jl")
+include("multivariate_wrapper.jl")
+include("Visualisation.jl")
+tune(mp, task=task, storage=storage, data=data, measure=mean_squared_error)
+plot_storage(storage, plotting_args=Dict(:scale=>:log10))
+# modelᵧ = learnᵧ(lrn, task, data)
+# predictᵧ(modelᵧ, data_features=data, task=task)
+
+# Multivariate example
+
+#
+# modelᵧ = learnᵧ(lrn, task, data)
+# predictᵧ(modelᵧ, data=data, task=task)

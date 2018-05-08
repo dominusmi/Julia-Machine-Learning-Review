@@ -13,7 +13,7 @@ end
 mutable struct MultivariateRidge <: MultivariateModel
     λ::Float64
     sol::Matrix{<:Float64}
-    MultivariateLlsq(λ) = new(λ, zeros(0,0))
+    MultivariateRidge(λ) = new(λ, zeros(0,0))
 end
 
 function getParamsMultivariate()
@@ -29,7 +29,8 @@ function makeMultivariate(learner::Learner, task::Task, data)
 
     if prms["regType"] in possible_parameters["regType"]
         if prms["regType"] == "ridge"
-            λ = get(prms, :λ, false)?0.1:prms[:λ]
+            λ = get(prms, "λ", false)
+            if λ == false λ=0.1 end
             MLRModel(MultivariateRidge(λ), copy(prms))
         else
             MLRModel(MultivariateLlsq(), copy(prms))
@@ -43,7 +44,7 @@ end
 function learnᵧ!(modelᵧ::MLRModel{<:MultivariateRidge}; learner=nothing::Learner,
                 data=nothing::Matrix{Real}, task=nothing::Task)
 
-        modelᵧ.model.sol = ridge(data[:,task.features], data[:,task.targets])
+        modelᵧ.model.sol = ridge(data[:,task.features], data[:,task.targets], modelᵧ.model.λ)
 end
 
 
@@ -59,5 +60,5 @@ function predictᵧ(modelᵧ::MLRModel{<:MultivariateModel};
     sol = modelᵧ.model.sol
     A, b = sol[1:end-1,:], sol[end,:][:,:]
     preds = data_features * A .+ b'
-    preds
+    preds, nothing
 end
