@@ -10,27 +10,32 @@ import MLMetrics: mean_squared_error
 """
 immutable Task{T}
     _type::T
-    targets::Union{Array{<:Integer}, Integer}
+    targets::Array{<:Integer}
     features::Array{Int}
 end
 
 immutable RegressionTask end
 immutable ClassificationTask end
 
-function Task(;task_type="regression", target=nothing, data=nothing)
-    if target == nothing || data == nothing
+function Task(;task_type="regression", targets=nothing, data=nothing)
+    if targets == nothing || data == nothing
         throw("Requires target and data to be set")
     end
 
     # reshapes features without target
     features = size(data,2)
-    features = deleteat!( collect(1:features), target)
+    features = deleteat!( collect(1:features), targets)
 
     # Finds the right type (classification or regression)
     TaskType = Symbol(titlecase(lowercase(task_type))*"Task")
     TaskType = getfield(Main, TaskType)
 
-    Task(TaskType(), target, features)
+    # Transforms target into vector
+    if typeof(targets) <: Integer
+        targets = [targets]
+    end
+
+    Task(TaskType(), targets, features)
 end
 
 """
@@ -106,6 +111,17 @@ end
 getindex(p::ParametersSet, i::Int64) = p.parameters[i]
 
 """
+    Structure used to record results of tuning
+"""
+mutable struct MLRStorage
+    models::Array{<:Any,1}
+    measures::Array{<:Any,1}
+    averageCV::Array{<:Float64,1}
+    parameters::Array{<:Dict,1}
+    MLRStorage() = new([],[],Array{Float64}(0),Array{Dict}(0))
+end
+
+"""
     Abstraction layer for model
 """
 immutable MLRModel{T}
@@ -144,19 +160,5 @@ function learnᵧ(learner::Learner, task::Task, data)
     modelᵧ
 end
 
-#### UTILITIES ####
-function Fakedata(N,d)
-    n_obs = 100
-    x = randn((n_obs,d))
-    y = sum(x*randn(d),2)
-
-    hcat(x,y)
-end
-
-function FakedataClassif(N,d)
-    n_obs = 100
-    x = randn((n_obs,d))
-    y = ( sum(x*randn(d),2) .> mean(sum(x*randn(d),2)) )
-
-    hcat(x,y)
-end
+include("Storage.jl")
+include("Utilities.jl")

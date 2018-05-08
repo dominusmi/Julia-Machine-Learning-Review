@@ -26,12 +26,10 @@ end
 function makeMultivariate(learner::Learner, task::Task, data)
     prms = learner.parameters
     possible_parameters = getParamsMultivariate()
-    println(Learner)
-    println(possible_parameters)
 
     if prms["regType"] in possible_parameters["regType"]
         if prms["regType"] == "ridge"
-            λ = get(prms, "λ", false)?0.1:prms["λ"]
+            λ = get(prms, :λ, false)?0.1:prms[:λ]
             MLRModel(MultivariateRidge(λ), copy(prms))
         else
             MLRModel(MultivariateLlsq(), copy(prms))

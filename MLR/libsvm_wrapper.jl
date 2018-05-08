@@ -46,9 +46,10 @@ function predictᵧ(modelᵧ::MLRModel{<:LIBSVM.SVM{Float64}};
     labels, decision_values
 end
 
-function learnᵧ(modelᵧ::MLRModel{<:LIBSVM.AbstractSVC}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ(modelᵧ::MLRModel{<:LIBSVM.AbstractSVC}; learner=nothing::Learner,
+                data=nothing::Matrix{Real}, task=nothing::Task)
     train = data[:, task.features]'
-    targets = data[:,task.targets]
+    targets = data[:,task.targets[1]]
 
     model = svmtrain(train,targets; modelᵧ.parameters...)
     modelᵧ = MLRModel(model, modelᵧ.parameters)
