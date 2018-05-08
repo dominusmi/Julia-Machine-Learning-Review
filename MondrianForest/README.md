@@ -2,11 +2,12 @@
 
 **Todo:**
 
-- [x] Off-line algorithm 
-- [ ]  On-line algorithm
+- [x] Off-line algorithm
+- [x] On-line algorithm
 - [ ] Optimise (parallelisation)
 - [ ] JuliaDB support
-- [ ] [MLJ](https://github.com/dominusmi/warwick-rsg/tree/master/MLR) interface 
+- [ ] [MLJ](https://github.com/dominusmi/warwick-rsg/tree/master/MLR) interface
+- [ ] Make beautiful
 
 ### [Comparisons](https://github.com/dominusmi/warwick-rsg/tree/master/MondrianForest/comparisons)
 
