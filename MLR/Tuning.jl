@@ -33,21 +33,6 @@ function parameters_dictionary(ps::ParametersSet, array, discrete_prms_map)
     dict
 end
 
-"""
-    returns lists of train and test arrays, based on the sampling method
-"""
-function get_samples(sampler::Resampling, n_obs::Int64)
-    trainᵢ = []
-    testᵢ = []
-    if sampler.method == "KFold"
-        kfold = Kfold(n_obs, sampler.iterations)
-        for train in kfold
-            push!(trainᵢ, collect(train))
-            push!(testᵢ, setdiff(1:n_obs, trainᵢ[end]))
-        end
-    end
-    trainᵢ, testᵢ
-end
 
 """
     Sets up the initial parameter value-indeces and ranges of each parameter

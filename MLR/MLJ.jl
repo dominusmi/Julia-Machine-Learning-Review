@@ -1,6 +1,6 @@
 import StatsBase: predict
 import Base: getindex, show
-import MLBase: Kfold, fit!, predict
+import MLBase: Kfold, LOOCV, fit!, predict
 import MLMetrics: mean_squared_error
 
 """
@@ -63,6 +63,7 @@ immutable Resampling
     method::String
     iterations::Int
     Resampling() = new("KFold", 3)
+    Resampling(name::String) = new(name, 0)
 end
 
 
