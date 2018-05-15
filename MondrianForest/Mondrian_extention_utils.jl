@@ -25,7 +25,7 @@ function sample_extended_split_dimension(Θ,datapoint) #input: boxes, datapoint 
     return d,x
 end
 
-function Mondrian_Node(parent,τ,node_type,δ,ζ,Θ,tab, c, Gₚ)  #constructor used in Alg4 (Extended_Mond)
+function Mondrian_Node(parent::Nullable{Mondrian_Node},τ::Float64,node_type::Array{Bool,1},δ::Nullable{Int},ζ::Nullable{Float64},Θ::Nullable{Axis_Aligned_Box},tab::Array{Int}, c::Array{Int}, Gₚ::Array{Float64})  #constructor used in Alg4 (Extended_Mond)
     N = Mondrian_Node(parent,
                       left::Nullable{Mondrian_Node},
                       right::Nullable{Mondrian_Node},
@@ -41,7 +41,7 @@ function Mondrian_Node(parent,τ,node_type,δ,ζ,Θ,tab, c, Gₚ)  #constructor 
 end
 
 
-function Mondrian_Node(τ,node_type,δ,ζ,Θ,tab,c,Gₚ)  #constructor used in Alg4
+function Mondrian_Node(τ::Float64,node_type::Array{Bool,1},δ::Nullable{Int},ζ::Nullable{Float64},Θ::Nullable{Axis_Aligned_Box},tab::Array{Int},c::Array{Int},Gₚ::Array{Float64})  #constructor used in Alg4
     N = Mondrian_Node(Nullable{Mondrian_Node}(),
                       left::Nullable{Mondrian_Node},
                       right::Nullable{Mondrian_Node},

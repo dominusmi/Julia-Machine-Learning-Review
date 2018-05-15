@@ -17,11 +17,23 @@ function Extend_Mondrian_Block!(T,λ,j,D) # Input: Mondrian Tree, lifetime, node
     if τₚ + E < j.τ
         d,x= sample_extended_split_dimension(get(j.Θ),D[1])
         Θ = update_intervals(get(j.Θ),D)
-        if j.node_type[3]==true                                             ## check if we replace the root
-            j_wave=Mondrian_Node(E,[false,false,true],d,x,Θ,zeros(size(get(j.tab))) ,zeros(size(get(j.c))),zeros(size(get(j.Gₚ))))
-            j.node_type=[true,false,false]
+        if j.node_type[3]==true  ## check if we replace the root
+            j_wave=Mondrian_Node(E,[true,false,false])
+	    j_wave.δ = d
+        j_wave.ζ = x
+        j_wave.Θ = Θ
+        j_wave.tab = zeros(size(get(j.tab)))
+        j_wave.c = zeros(size(get(j.c)))
+        j_wave.Gₚ = zeros(size(get(j.Gₚ)))
         else
-            j_wave=Mondrian_Node(parent=get(j.parent),get(j.parent).τ+E,[true,false,false],d,x,Θ,get(j.parent).tab,get(j.parent).c,get(j.parent).Gₚ)
+            j_wave=Mondrian_Node(get(j.parent).τ+E,[true,false,false])
+	    j_wave.parent = j.parent
+	    j_wave.δ = d
+        j_wave.ζ = x
+        j_wave.Θ = Θ
+        j_wave.tab = get(j.parent).tab
+        j_wave.c = get(j.parent).c
+        j_wave.Gₚ = get(j.parent).Gₚ
             if j == get(j.parent).left
                 get(j.parent).left = j_wave
             else
@@ -35,27 +47,29 @@ function Extend_Mondrian_Block!(T,λ,j,D) # Input: Mondrian Tree, lifetime, node
         j_prime.tab = zeros(size(j_wave.tab))
         j_prime.c = zeros(size(j_wave.tab))
         j_prime.Gₚ=zeros(size(j_wave.c,1))
-
+        
         if D[1][d] > x
             j_wave.left = j
-            j_wave.right = j_prime
-
-                if get(j.Θ.Intervals[2][d])> ζ    #adapt box of j
-                    j.Θ.Intervals[2][d] = ζ
+            j_wave.right = j_prime 
+                if get(j.Θ).Intervals[d,2]> x    #adapt box of j
+                    get(j.Θ).Intervals[d,2] = x
                 end
             j_prime.Θ = j_wave.Θ
-            j_wave.Θ.Intervals[1][d] = ζ
-            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,D[1],D[2])
+            get(j_wave.Θ).Intervals[d,1] = x
+            A=zeros(1,length(D[1]))
+            A[:,:]=D[1]
+            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,A,[D[2]])
         else
             j_wave.left = j_prime
             j_wave.right = j
-
-            if get(j.Θ.Intervals[1][d])< ζ
-                j.Θ.Intervals[1][d] = ζ
+            if get(j.Θ).Intervals[d,1]< x
+                get(j.Θ).Intervals[d,1]= x
             end
             j_prime.Θ = j_wave.Θ
-            j_wave.Θ.Intervals[2][d] = ζ
-            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,D[1],D[2])
+            get(j_wave.Θ).Intervals[d,2] = x
+            A=zeros(1,length(D[1]))
+            A[:,:]=D[1]
+            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,A,[D[2]])
         end
 
 
