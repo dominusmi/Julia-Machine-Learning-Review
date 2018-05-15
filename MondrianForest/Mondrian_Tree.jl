@@ -66,15 +66,15 @@ end
 
 function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
                                λ::Float64,
-                               X::Array{Float64,2},
+                               X::Array{Float64,N} where N,
                                Y::Array{Int64})
     # initialise the tree
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(X))
     e.Θ = Θ
-    get_count(e,Y, length(unique(Y)))
-    e.Gₚ = zeros(size(unique(Y),1))
+    get_count(e,Y, 2)
+    e.Gₚ = zeros(2)
     Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y)
     return Tree
 end
@@ -83,7 +83,7 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
                                 λ::Float64,
                                 Tree::Mondrian_Tree,
-                                X::Array{Float64,2},
+                                X::Array{Float64,N} where N,
                                 Y::Array{Int64})
     # sample the time
     E = rand(Exponential(1/Linear_dimension(Θ)))
@@ -140,14 +140,18 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
     # set j as leaf for time out
     else
         j.τ = λ
-        j.node_type = [false,true,false]
+        if j.node_type == [false,false,true]
+            j.node_type = [false,true,true]
+        else
+            j.node_type = [false,true,false]
+        end
         push!(Tree.leaves,j)
         return
     end
 end
 
 # only check indices against the changed dimension CF lines 93-97
-function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2}, dim::Int64)
+function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim::Int64)
     # this function cause large memory allocation according
     # to @time but the system does not record any
     # large memory allocation -> ram does not get increased
@@ -161,7 +165,7 @@ function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2}, dim::Int64)
     return indices
 end
 # returns any data from D contained in the boxes of Θ
-function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,2})
+function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N)
     # this function cause large memory allocation according
     # to @time but the system does not record any
     # large memory allocation -> ram does not get increased

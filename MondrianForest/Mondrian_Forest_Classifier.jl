@@ -6,7 +6,7 @@ mutable struct Mondrian_Tree_Classifier
     Tree::Mondrian_Tree
     λ::Float64                              # lifetime parameter set to inf in paper and 1e9 in implementations (e.g pythons)
     γ::Real                                 # Hierachy of normailized stable processes discount parameter 10*Dimensionality of data in the paper
-    X::Array{Float64,2}                     # training data
+    X::Array{Float64,N} where N                     # training data
     Y::Array{Int}                           # training labels
 end
 
@@ -20,7 +20,7 @@ end
 
 function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,
                                   λ::Float64,
-                                  X::Array{Float64,2},
+                                  X::Array{Float64,N} where N,
                                   Y::Array{Int64})
     return Mondrian_Tree_Classifier(Tree,λ,0,X,Y)
 end
@@ -44,7 +44,7 @@ end
 ### Mondrian Tree Training and Prediction
 
 function train!(Tree::Mondrian_Tree,
-                X::Array{Float64,2},
+                X::Array{Float64,N} where N,
                 Y::Array{Int64},
                 λ=1e9)
     Sample_Mondrian_Tree!(Tree,λ,X,Y)
@@ -52,7 +52,7 @@ function train!(Tree::Mondrian_Tree,
 end
 
 function predict!(Tree::Mondrian_Tree,      # batch prediction NB supposedly can change tree structure!
-                  X::Array{Float64,2})
+                  X::Array{Float64,N} where N)
     pred = []
     for i in 1:size(X,1)
         p = predict!(Tree,X[i,:],10*size(X,2))
