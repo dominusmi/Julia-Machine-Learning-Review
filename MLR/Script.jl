@@ -28,29 +28,30 @@ include("Tuning.jl")
 
 ## Example regression using GLM with penalty and λ tuning
 
-# include("glm_wrapper.jl")
-# ps = ParametersSet([
-#     ContinuousParameter(
-#         name = "cost",
-#         lower = -4,
-#         upper = 1,
-#         transform = x->10^x
-#     ),
-#     DiscreteParameter(
-#         name = "penalty",
-#         values = [L2Penalty(), L1Penalty()]
-#     )
-# ])
-#
-# data = Fakedata(1000,3)
-#
-# task = Task(task_type="classification", targets=[4], data=data)
-# lrn = Learner("glm")
-#
-# storage = MLRStorage()
-#
-# tune(learner=lrn, task=task, data=data, parameters_set=ps,
-#     measure=mean_squared_error, storage=storage)
+include("glm_wrapper.jl")
+
+ps = ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "penalty",
+        values = [L2Penalty(), L1Penalty()]
+    )
+])
+
+data = Fakedata(1000,3)
+
+task = Task(task_type="classification", targets=[4], data=data)
+lrn = Learner("glm")
+
+storage = MLRStorage()
+
+tune(learner=lrn, task=task, data=data, parameters_set=ps,
+    measure=mean_squared_error, storage=storage)
 #
 # include("Visualisation.jl")
 
@@ -91,7 +92,6 @@ include("Tuning.jl")
 
 
 # Multiplex example
-include("MLJ.jl")
 include("glm_wrapper.jl")
 include("multivariate_wrapper.jl")
 
