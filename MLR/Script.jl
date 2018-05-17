@@ -1,6 +1,4 @@
 include("MLJ.jl")
-include("Tuning.jl")
-
 
 # Decision trees example
 
@@ -50,7 +48,7 @@ lrn = Learner("glm")
 
 storage = MLRStorage()
 
-tune(learner=lrn, task=task, data=data, parameters_set=ps,
+tune(lrn, task, data, ps,
     measure=mean_squared_error, storage=storage)
 #
 # include("Visualisation.jl")
@@ -87,7 +85,7 @@ tune(learner=lrn, task=task, data=data, parameters_set=ps,
 # task = Task(task_type="classification", targets=[4], data=data)
 # lrn = Learner("libsvm")
 #
-# tune(learner=lrn, task=task, data=data, parameters_set=ps,
+# tune(lrn, task, data, ps,
 #     measure=accuracy)
 
 
@@ -138,7 +136,7 @@ mp = MLRMultiplex(lrns, psSet)
 include("Tuning.jl")
 include("multivariate_wrapper.jl")
 include("Visualisation.jl")
-tune(mp, task=task, storage=storage, data=data, measure=mean_squared_error)
+tune(mp, task, data, storage=storage, measure=mean_squared_error)
 plot_storage(storage, plotting_args=Dict(:scale=>:log10))
 # modelᵧ = learnᵧ(lrn, task, data)
 # predictᵧ(modelᵧ, data_features=data, task=task)

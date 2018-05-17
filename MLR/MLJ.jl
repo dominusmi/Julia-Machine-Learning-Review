@@ -1,7 +1,7 @@
 import StatsBase: predict
 import Base: getindex, show
 import MLBase: Kfold, LOOCV, fit!, predict
-import MLMetrics: mean_squared_error
+import MLMetrics: accuracy, mean_squared_error
 
 """
     Contains task type (regression,classification,..)
@@ -141,7 +141,6 @@ immutable MLRMultiplex
 end
 
 
-#### ABSTRACT FUNCTIONS ####
 """
     Constructor for any model. Will call the function makeModelname, where
     modelname is stored in learner.name
@@ -170,5 +169,7 @@ function learnᵧ(learner::Learner, task::Task, data)
     modelᵧ
 end
 
+include("Tuning.jl")
+include("Resampling.jl")
 include("Storage.jl")
 include("Utilities.jl")

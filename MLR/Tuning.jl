@@ -67,9 +67,9 @@ end
 """
     Tunes the model
 """
-function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matrix{Real},
-                parameters_set=nothing::ParametersSet, sampler=Resampling()::Resampling,
-                measure=nothing::Function, storage=nothing::Union{Void,MLRStorage})
+function tune(learner::Learner, task::Task, data::Matrix{<:Real}, parameters_set::ParametersSet;
+                sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
+                storage=nothing::Union{Void,MLRStorage})
 
     # TODO: divide and clean up code. Use better goddam variable names.
 
@@ -121,8 +121,8 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
 end
 
 
-function tune(multiplex::MLRMultiplex; task=nothing::Task, data=nothing::Matrix{Real},
-    sampler=Resampling()::Resampling, measure=nothing::Function,
+function tune(multiplex::MLRMultiplex, task::Task, data::Matrix{<:Real};
+    sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
