@@ -85,22 +85,28 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
                                 Tree::Mondrian_Tree,
                                 X::Array{Float64,N} where N,
                                 Y::Array{Int64})
-    # sample the time
-    E = rand(Exponential(1/Linear_dimension(Θ)))
-    if j.node_type[3]==true
-        τₚ = 0
+    # paused mondrian check
+    # should be one for pure targets
+    if sum(j.c .> 0) == 1
+        j.τ = λ
     else
-        τₚ = (get(j.parent)).τ
+        # not paused, sample the time
+        E = rand(Exponential(1/Linear_dimension(Θ)))
+        if j.node_type[3]==true
+            τₚ = 0
+        else
+            τₚ = (get(j.parent)).τ
+        end
+        j.τ = τₚ+E
     end
-    # if split occured in time
-    if τₚ + E < λ
+    # if pausing should fall to the next else, other wise split is valid
+    if j.τ < λ
         # get split dimension and cut position
         # A2 -> lines 6,7
         d,x = sample_split_dimension(Θ)
         # update node j's data
         j.δ = d
         j.ζ = x
-        j.τ = τₚ+E
         Θᴸ = copy(Θ)
         # look at this copy
         Θᴿ = copy(Θ)
@@ -140,8 +146,11 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
     # set j as leaf for time out
     else
         j.τ = λ
+        # this is is to handle the case of a single
+        # data point, so the root is a leaf!
         if j.node_type == [false,false,true]
             j.node_type = [false,true,true]
+        # normal stuff
         else
             j.node_type = [false,true,false]
         end

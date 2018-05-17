@@ -112,5 +112,20 @@ function predict_proba!(MF::Mondrian_Forest_Classifier,
             pred[item[1]] += item[2]
         end
     end
-    return pred/size(X,1)
+    return pred/length(MF.Trees)
+end
+
+## For testing
+
+function FakedataClassif(N,d,N_test=0)
+    X = randn((N,d))
+    param1 = randn(d)
+    param2 = randn(d)
+    Y = ( sum(X*param1,2) .> mean(sum(X*param2,2)) )
+    if (N_test > 0)
+        x = randn((N_test,d))
+        y = ( sum(x*param1,2) .> mean(sum(x*param2,2)) )
+        return X,Y,x,y
+    end
+    return X,Y
 end
