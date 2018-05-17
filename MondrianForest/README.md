@@ -12,6 +12,10 @@
 ### [Comparisons](https://github.com/dominusmi/warwick-rsg/tree/master/MondrianForest/comparisons)
 
 ![alt text](https://github.com/dominusmi/warwick-rsg/blob/master/MondrianForest/comparisons/n_data_scale.png)
+
+Look at the bottom of [Example.ipynb](https://github.com/dominusmi/warwick-rsg/blob/master/MondrianForest/Example.ipynb) to
+see the code that generates this one, it does seem too good.
+
 ![alt text](https://github.com/dominusmi/warwick-rsg/blob/master/MondrianForest/comparisons/n_tree_scale.png)
 
 ### References 
