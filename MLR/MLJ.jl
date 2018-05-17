@@ -12,12 +12,13 @@ immutable Task{T}
     _type::T
     targets::Array{<:Integer}
     features::Array{Int}
+    data::Matrix{<:Real}
 end
 
 immutable RegressionTask end
 immutable ClassificationTask end
 
-function Task(;task_type="regression", targets=nothing, data=nothing)
+function Task(;task_type="regression", targets=nothing, data=nothing::Matrix{<:Real})
     if targets == nothing || data == nothing
         throw("Requires target and data to be set")
     end
@@ -35,7 +36,7 @@ function Task(;task_type="regression", targets=nothing, data=nothing)
         targets = [targets]
     end
 
-    Task(TaskType(), targets, features)
+    Task(TaskType(), targets, features, data)
 end
 
 """
@@ -152,19 +153,19 @@ function MLRModel(learner::Learner, task::Task, data)
     f_name = "make" * titlecase(f_name)
 
     f = getfield(Main, Symbol(f_name))
-    f(learner, task, data)
+    f(learner, task)
 end
 
 """
     Function which sets up model given by learner, and then calls model-based
     learning function, which must be defined separately for each model.
 """
-function learnᵧ(learner::Learner, task::Task, data)
-    modelᵧ = MLRModel(learner, task, data)
+function learnᵧ(learner::Learner, task::Task)
+    modelᵧ = MLRModel(learner, task)
     if modelᵧ.inplace
-        learnᵧ!(modelᵧ, learner=learner, task=task, data=data)
+        learnᵧ!(modelᵧ, learner, task)
     else
-        modelᵧ = learnᵧ(modelᵧ, learner=learner, task=task, data=data)
+        modelᵧ = learnᵧ(modelᵧ, learner, task)
     end
     modelᵧ
 end

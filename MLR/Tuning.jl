@@ -67,7 +67,7 @@ end
 """
     Tunes the model
 """
-function tune(learner::Learner, task::Task, data::Matrix{<:Real}, parameters_set::ParametersSet;
+function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
                 storage=nothing::Union{Void,MLRStorage})
 
@@ -103,10 +103,10 @@ function tune(learner::Learner, task::Task, data::Matrix{<:Real}, parameters_set
 
         measures = []
         for j in 1:length(trainⱼ)
-            modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], :])
-            preds, prob = predictᵧ(modelᵧ, data_features=data[testⱼ[j],task.features], task=task)
+            modelᵧ = learnᵧ(lrn, task, task.data[trainⱼ[j], :])
+            preds, prob = predictᵧ(modelᵧ, data=task.data[testⱼ[j],task.features], task=task)
 
-            _measure = measure( data[testⱼ[j], task.targets[1]], preds)
+            _measure = measure( task.data[testⱼ[j], task.targets[1]], preds)
             push!(measures, _measure)
         end
         # Store and print cross validation results
@@ -116,20 +116,20 @@ function tune(learner::Learner, task::Task, data::Matrix{<:Real}, parameters_set
         println("Average CV accuracy: $(mean(measures))\n")
 
         update_parameters!(prms_value, prms_range)
-
     end
+    storage
 end
 
 
-function tune(multiplex::MLRMultiplex, task::Task, data::Matrix{<:Real};
+function tune(multiplex::MLRMultiplex, task::Task;
     sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
-        tune(learner=multiplex.learners[i], task=task, data=data, parameters_set=multiplex.parametersSets[i],
+        tune(learner=multiplex.learners[i], task=task, parameters_set=multiplex.parametersSets[i],
             sampler=sampler, measure=measure, storage=storage)
     end
-
+    storage
 end
 
 """
