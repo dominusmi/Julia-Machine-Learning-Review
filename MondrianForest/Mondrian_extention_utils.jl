@@ -80,3 +80,19 @@ function update_intervals(Θ::Axis_Aligned_Box,X::Array{Float64})
     Θ = Axis_Aligned_Box(Intervals,Θ.D)             # return updated intervals
     return Θ
 end
+
+"""
+`function merge_data(A::Array{Any, N} where N, B::Array{Any, N} where N)`
+The function merge_data uses the build-in function vcat() to merge two datasets (as matrices). 
+
+`Input`: matrices A,B (Float64) with matching dimensions.
+
+`Output`: merged Array C
+
+
+"""
+
+function merge_data(A::Array{Any, N} where N, B::Array{Any, N} where N)  #redo
+   C = vcat(A,B) 
+   return B
+end

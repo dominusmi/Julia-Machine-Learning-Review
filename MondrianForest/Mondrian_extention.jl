@@ -47,7 +47,7 @@ This function calls the functions
 
 """
 
-## Algorithm 4 in the Paper "Mondrian Forests: Efficient Online Random Forests"
+## Algorithm 4 in the Paper 
 function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X::Array{Float64},Y::Int64)
     
     E = rand(Exponential(1/Extended_dimension(get(j.Θ),X)))  #sample value E
