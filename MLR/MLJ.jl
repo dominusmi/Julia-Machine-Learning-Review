@@ -45,8 +45,10 @@ end
 immutable Learner
     name::String
     parameters::Union{Void,Dict{Any, Any}}
+    learners::Union{Void,Vector{Learner}}
     Learner(learner::String) = new(learner, Dict())
-    Learner(learner::String, parameters::Dict) = new(learner, parameters)
+    Learner(learner::String, parameters::Dict) = new(learner, parameters, nothing)
+    Learner(learners::Vector{Learner}) = new("stacking", nothing, learners)
 end
 
 function show(io::IO,l::Learner)

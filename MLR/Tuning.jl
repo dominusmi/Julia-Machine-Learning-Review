@@ -64,6 +64,7 @@ function prepare_parameters!(prms_set, prms_value, prms_range, discrete_prms_map
     total_parameters
 end
 
+
 """
     Tunes the model
 """
@@ -118,6 +119,21 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
         update_parameters!(prms_value, prms_range)
     end
     storage
+end
+
+"""
+    This should be called only when the learner is a stacking
+    TODO: Make structure clearer
+"""
+function tune(learner::Learner, task::Task;
+                sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
+                storage=nothing::Union{Void,MLRStorage})
+
+    @parallel for (key, ps) in learner.learners
+        lrn = Learner(key)
+        tune(lrn, task, ps, measure=measure, storage=storage)
+    end
+
 end
 
 

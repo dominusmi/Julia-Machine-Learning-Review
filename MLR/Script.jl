@@ -146,3 +146,34 @@ plot_storage(storage, plotting_args=Dict(:scale=>:log10))
 #
 # modelᵧ = learnᵧ(lrn, task, data)
 # predictᵧ(modelᵧ, data=data, task=task)
+
+
+# Stacking
+include("multivariate_wrapper.jl")
+lrns = []
+push!(lrns, Dict("multivariate"=> ParametersSet([
+    DiscreteParameter(
+        name="regType",
+        values = ["llsq", "ridge"]
+    ),
+    ContinuousParameter(
+        name = "λ",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    )
+])))
+push!(lrns, Dict(""=> ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "penalty",
+        values = [L2Penalty(), L1Penalty()]
+    )
+])))
+
+stacking = Learner(lrns)
