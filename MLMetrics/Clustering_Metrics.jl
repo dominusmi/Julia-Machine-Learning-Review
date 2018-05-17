@@ -39,32 +39,6 @@ function normalized_mutual_info_score(labels_true::AbstractArray,labels_pred::Ab
     return NMI
 end
 
-function homogeneity_score(U::AbstractArray,V::AbstractArray)
-   if H(U,V) == 0 && isnan(H(U,V))
-        return 1
-    else
-        return (1 - (H_conditional(U,V)/H(U)))
-    end
-end
-
-function completeness_score(U::AbstractArray,V::AbstractArray)
-    return (homogeneity_score(V,U))
-end
-
-
-
-function homogeneity_score(U::AbstractArray,V::AbstractArray)
-   if H(U,V) == 0 && isnan(H(U,V))
-        return 1
-    else
-        return (1 - (H_conditional(U,V)/H(U)))
-    end
-end
-
-function completeness_score(U::AbstractArray,V::AbstractArray)
-    return (homogeneity_score(V,U))
-end
-
 function adjusted_mutual_info_score(labels_true::AbstractArray, labels_pred::AbstractArray ,mode::String = "max")
     AMI = 0
     if mode == "sqrt"
@@ -96,4 +70,17 @@ function adjusted_rand_score(labels_true::AbstractArray,labels_pred::AbstractArr
     Max_Index = 0.5 * (sum(a.*(a.-1)./2) + sum(b.*(b.-1)./2))
 
     return (Index-Expected_Index)/(Max_Index-Expected_Index)
+end
+
+
+function homogeneity_score(U::AbstractArray,V::AbstractArray)
+   if H(U,V) == 0 && isnan(H(U,V))
+        return 1
+    else
+        return (1 - (H_conditional(U,V)/H(U)))
+    end
+end
+
+function completeness_score(U::AbstractArray,V::AbstractArray)
+    return (homogeneity_score(V,U))
 end
