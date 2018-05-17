@@ -53,3 +53,22 @@ function Expected_MI(U::AbstractArray,V::AbstractArray)
     end
     return result
 end
+
+function H_conditional(U::AbstractArray,V::AbstractArray)
+    size(U) == size(V) || throw(DimensionMismatch("size of U not equal to size of V"))
+    result = 0
+    N = length(U)
+    U_clusters = Set(U)
+    V_clusters = Set(V)
+    R = length(U_clusters)
+    C = length(V_clusters)
+    CT = contingency_table(U,V) 
+    a = reshape(sum(CT,2),R)
+    b = reshape(sum(CT,1),C)
+    for i = 1:R
+        for j = 1:C
+            result += (CT[i,j]/N) * log(CT[i,j]/b[j])
+        end    
+    end
+    return result
+end
