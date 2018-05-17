@@ -103,8 +103,8 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
 
         measures = []
         for j in 1:length(trainⱼ)
-            modelᵧ = learnᵧ(lrn, task, task.data[trainⱼ[j], :])
-            preds, prob = predictᵧ(modelᵧ, data=task.data[testⱼ[j],task.features], task=task)
+            modelᵧ = learnᵧ(lrn, task)
+            preds, prob = predictᵧ(modelᵧ, task.data[testⱼ[j],task.features], task)
 
             _measure = measure( task.data[testⱼ[j], task.targets[1]], preds)
             push!(measures, _measure)
@@ -126,7 +126,7 @@ function tune(multiplex::MLRMultiplex, task::Task;
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
-        tune(learner=multiplex.learners[i], task=task, parameters_set=multiplex.parametersSets[i],
+        tune(multiplex.learners[i], task, multiplex.parametersSets[i],
             sampler=sampler, measure=measure, storage=storage)
     end
     storage

@@ -53,7 +53,7 @@ function learnᵧ!(modelᵧ::MLRModel{<:MultivariateLlsq}, learner::Learner, tas
 end
 
 function predictᵧ(modelᵧ::MLRModel{<:MultivariateModel},
-                    data_features::Matrix{Real}, task::Task)
+                    data_features::Matrix{<:Real}, task::Task)
 
     sol = modelᵧ.model.sol
     A, b = sol[1:end-1,:], sol[end,:][:,:]

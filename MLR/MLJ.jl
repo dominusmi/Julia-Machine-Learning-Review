@@ -131,7 +131,7 @@ immutable MLRModel{T}
     parameters
     inplace::Bool
 end
-MLRModel(model, parameters; inplace=true) = MLRModel(model, parameters, inplace)
+MLRModel(model, parameters; inplace=true::Bool) = MLRModel(model, parameters, inplace)
 
 
 immutable MLRMultiplex
@@ -147,7 +147,7 @@ end
     modelname is stored in learner.name
     Function makeModelname should be defined separately for each model
 """
-function MLRModel(learner::Learner, task::Task, data)
+function MLRModel(learner::Learner, task::Task)
     # Calls function with name "makeModelname"
     f_name = learner.name
     f_name = "make" * titlecase(f_name)

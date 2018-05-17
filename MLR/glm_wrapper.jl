@@ -110,6 +110,6 @@ end
 """
     How to learn using a specific model
 """
-function learnᵧ!(modelᵧ::MLRModel{<:SModel}, learner::Learner, data::Matrix{Real}, task::Task)
+function learnᵧ!(modelᵧ::MLRModel{<:SModel}, learner::Learner, task::Task)
     learn!(modelᵧ.model)
 end
