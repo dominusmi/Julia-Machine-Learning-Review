@@ -57,13 +57,13 @@ function adjusted_mutual_info_score(labels_true::AbstractArray, labels_pred::Abs
     return AMI
 end
 
-function adjusted_rand_score(U::AbstractArray,V::AbstractArray)
+function adjusted_rand_score(labels_true::AbstractArray,labels_pred::AbstractArray)
     size(U) == size(V) || throw(DimensionMismatch("size of U not equal to size of V"))
 
-    N = length(U)
-    CT = contingency_table(U,V)
-    a = reshape(sum(CT,2),length(Set(U)))
-    b = reshape(sum(CT,1),length(Set(V)))
+    N = length(labels_pred)
+    CT = contingency_table(labels_true,labels_pred)
+    a = reshape(sum(CT,2),length(Set(labels_true)))
+    b = reshape(sum(CT,1),length(Set(labels_pred)))
 
     Index = sum(CT.*(CT.-1)./2)
     Expected_Index = sum(a.*(a.-1)./2)*sum(b.*(b.-1)./2)/(N*(N-1)/2)
