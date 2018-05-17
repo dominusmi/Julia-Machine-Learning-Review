@@ -80,7 +80,7 @@ function train!(MF::Mondrian_Forest_Classifier,
                 X::Array{Float64,2},
                 Y::Array{Int64},
                 λ::Float64=1e9)
-    for i in 1:MF.n_trees
+    @parallel for i in 1:MF.n_trees
         Tree = Mondrian_Tree()
         train!(Tree, X, Y, λ)
         push!(MF.Trees,Tree)
@@ -137,10 +137,6 @@ function print_mondrian_tree(node::Mondrian_Node, depth=-1, indent=0)
     ## https://github.com/bensadeghi/DecisionTree.jl/blob/5f0adc5d6d0280f995ccc364e5d00a72f6387368/src/DecisionTree.jl#L89
     if (node.node_type != [0,0,1]) & (indent==0)
         println("Not starting from root node..")
-    end
-    if depth == indent
-        println()
-        return
     end
     if (node.node_type == [0,1,0])
         println("Prediction: ", round.((node.Gₚ),3))
