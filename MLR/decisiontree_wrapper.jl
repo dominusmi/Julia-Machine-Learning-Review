@@ -2,7 +2,7 @@ using DecisionTree
 
 
 
-function makeDecisiontree(learner::Learner, task::Task, data)
+function makeDecisiontree(learner::Learner, task::Task)
     parameters = []
     possible_names = ["maxlabels", "nsubfeatures", "maxdepth"]
     possible_parameters = Dict(
@@ -33,7 +33,7 @@ end
 
 immutable DecisionForestᵧ end
 
-function makeForest(lrn::Learner, task::Task, data)
+function makeForest(lrn::Learner, task::Task)
     lprms = copy(lrn.parameters)
 
     parameters = []
@@ -72,38 +72,38 @@ end
 
 
 
-function learnᵧ(modelᵧ::MLRModel{<:Node}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ(modelᵧ::MLRModel{<:Node}, learner::Learner, task::Task)
     # TODO: add pruning
 
-    train = data[:,task.features]
-    target = data[:,task.targets[1]]
+    train = task.data[:,task.features]
+    target = task.data[:,task.targets[1]]
 
     tree = build_tree(target, train, modelᵧ.parameters...)
 
     MLRModel(tree, modelᵧ.parameters)
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Node};
-                     data_features=nothing::Matrix, task=nothing::Task)
-    probs = apply_tree(modelᵧ.model, data[:,task.features])
+function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Node},
+                     data_features::Matrix, task::Task)
+    probs = apply_tree(modelᵧ.model, data_features)
     preds = [p>0.5?1:0 for p in probs]
     preds, probs
 end
 
 
-function learnᵧ(modelᵧ::MLRModel{<:DecisionForestᵧ}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ(modelᵧ::MLRModel{<:DecisionForestᵧ}, learner::Learner, task::Task)
     # TODO: add pruning
 
-    train = data[:,task.features]
-    targets = data[:,task.targets[1]]
+    train = task.data[:,task.features]
+    targets = task.data[:,task.targets[1]]
 
     forest = build_forest(targets, train, modelᵧ.parameters...)
 
     MLRModel(forest, modelᵧ.parameters)
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Ensemble};
-                    data_features=nothing::Matrix, task=nothing::Task)
+function predictᵧ(modelᵧ::MLRModel{<:DecisionTree.Ensemble},
+                    data_features::Matrix, task::Task)
     probs = apply_forest(modelᵧ.model, data_features)
     preds = [p>0.5?1:0 for p in probs]
     preds, probs
