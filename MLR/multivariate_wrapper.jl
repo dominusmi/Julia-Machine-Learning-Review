@@ -23,7 +23,7 @@ function getParamsMultivariate()
     possible_parameters
 end
 
-function makeMultivariate(learner::Learner, task::Task, data)
+function makeMultivariate(learner::Learner, task::Task)
     prms = learner.parameters
     possible_parameters = getParamsMultivariate()
 
@@ -41,21 +41,19 @@ function makeMultivariate(learner::Learner, task::Task, data)
 end
 
 
-function learnᵧ!(modelᵧ::MLRModel{<:MultivariateRidge}; learner=nothing::Learner,
-                data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ!(modelᵧ::MLRModel{<:MultivariateRidge}, learner::Learner, task::Task)
 
-        modelᵧ.model.sol = ridge(data[:,task.features], data[:,task.targets], modelᵧ.model.λ)
+        modelᵧ.model.sol = ridge(task.data[:,task.features], task.data[:,task.targets], modelᵧ.model.λ)
 end
 
 
-function learnᵧ!(modelᵧ::MLRModel{<:MultivariateLlsq}; learner=nothing::Learner,
-                data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ!(modelᵧ::MLRModel{<:MultivariateLlsq}, learner::Learner, task::Task)
 
-        modelᵧ.model.sol = llsq(data[:,task.features], data[:,task.targets])
+        modelᵧ.model.sol = llsq(task.data[:,task.features], task.data[:,task.targets])
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:MultivariateModel};
-                    data_features=nothing::Matrix{Real}, task=nothing::Task)
+function predictᵧ(modelᵧ::MLRModel{<:MultivariateModel},
+                    data_features::Matrix{Real}, task::Task)
 
     sol = modelᵧ.model.sol
     A, b = sol[1:end-1,:], sol[end,:][:,:]

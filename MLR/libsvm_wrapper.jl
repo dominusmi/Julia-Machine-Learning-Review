@@ -20,7 +20,7 @@ function getParamsLibsvm()
     possible_parameters
 end
 
-function makeLibsvm(learner::Learner, task::Task, data)
+function makeLibsvm(learner::Learner, task::Task)
     parameters = Dict()
     possible_parameters = getParamsLibsvm()
 
@@ -40,16 +40,15 @@ function makeLibsvm(learner::Learner, task::Task, data)
     MLRModel(learner.parameters["svmtype"], parameters, inplace=false)
 end
 
-function predictᵧ(modelᵧ::MLRModel{<:LIBSVM.SVM{Float64}};
-                data_features=nothing::Matrix, task=nothing::Task)
+function predictᵧ(modelᵧ::MLRModel{<:LIBSVM.SVM{Float64}},
+                data_features::Matrix, task::Task)
     (labels, decision_values) = svmpredict(modelᵧ.model, data_features')
     labels, decision_values
 end
 
-function learnᵧ(modelᵧ::MLRModel{<:LIBSVM.AbstractSVC}; learner=nothing::Learner,
-                data=nothing::Matrix{Real}, task=nothing::Task)
-    train = data[:, task.features]'
-    targets = data[:,task.targets[1]]
+function learnᵧ(modelᵧ::MLRModel{<:LIBSVM.AbstractSVC}, learner::Learner, task::Task)
+    train = task.data[:, task.features]'
+    targets = task.data[:,task.targets[1]]
 
     model = svmtrain(train,targets; modelᵧ.parameters...)
     modelᵧ = MLRModel(model, modelᵧ.parameters)
