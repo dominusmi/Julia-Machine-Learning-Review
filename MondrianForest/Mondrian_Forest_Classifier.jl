@@ -129,3 +129,26 @@ function FakedataClassif(N,d,N_test=0)
     end
     return X,Y
 end
+
+## print the tree with text
+
+function print_mondrian_tree(node::Mondrian_Node, depth=-1, indent=0)
+    ## Adapted function from DecisionTree.jl
+    ## https://github.com/bensadeghi/DecisionTree.jl/blob/5f0adc5d6d0280f995ccc364e5d00a72f6387368/src/DecisionTree.jl#L89
+    if (node.node_type != [0,0,1]) & (indent==0)
+        println("Not starting from root node..")
+    end
+    if depth == indent
+        println()
+        return
+    end
+    if (node.node_type == [0,1,0])
+        println("Prediction: ", round.((node.Gₚ),3))
+        return
+    end
+    println("τ: ",round((node.τ),3))
+    print("    " ^ indent * "L-> ")
+    print_mondrian_tree(get(node.left), depth, indent + 1)
+    print("    " ^ indent * "R-> ")
+    print_mondrian_tree(get(node.right), depth, indent + 1)
+end

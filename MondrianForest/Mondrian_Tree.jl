@@ -1,7 +1,3 @@
-#### TODO remove some old functions: initialize_posterior_leaf_counts! et al
-
-
-
 #### Mondrian Tree as in https://arxiv.org/abs/1406.2673
 #### Lakshminarayanan, B., Roy, D.M. and Teh, Y.W., 2014. Mondrian forests: Efficient online random forests. In Advances in neural information processing systems (pp. 3140-3148).
 #### Alogrithm numbers (e.g A1) are as in the above paper
