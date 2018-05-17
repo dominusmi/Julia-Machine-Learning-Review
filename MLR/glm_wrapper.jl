@@ -26,45 +26,45 @@ function get_parameters(model::MLRModel{<:SModel})
 end
 
 
-function makeRidge(learner::Learner, task::Task, data)
+function makeRidge(learner::Learner, task::Task)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.targets])
+        model = SModel(task.data[:, task.features], task.data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.targets],
+        model = SModel(task.data[:, task.features], task.data[:, task.targets],
                         L2DistLoss(), L2Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
 
-function makeLasso(learner::Learner, task::Task, data)
+function makeLasso(learner::Learner, task::Task)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.targets])
+        model = SModel(task.data[:, task.features], task.data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.targets],
+        model = SModel(task.data[:, task.features], task.data[:, task.targets],
                         L2DistLoss(), L1Penalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
 
-function makeElasticnet(learner::Learner, task::Task, data)
+function makeElasticnet(learner::Learner, task::Task)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.targets])
+        model = SModel(task.data[:, task.features], task.data[:, task.targets])
     else
         parameters = []
         push!(parameters, get_λ(learner.parameters, task))
-        model = SModel(data[:, task.features], data[:, task.targets],
+        model = SModel(task.data[:, task.features], task.data[:, task.targets],
                         L2DistLoss(), ElasticNetPenalty(), parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
 
-function makeGlm(learner::Learner, task::Task, data)
+function makeGlm(learner::Learner, task::Task)
     if isempty(learner.parameters)
-        model = SModel(data[:, task.features], data[:, task.targets])
+        model = SModel(task.data[:, task.features], task.data[:, task.targets])
     else
         parameters = []
         if get(learner.parameters, :λ, false) !== false
@@ -79,7 +79,7 @@ function makeGlm(learner::Learner, task::Task, data)
             # Add penalty
             push!(parameters, learner.parameters[:loss])
         end
-        model = SModel(data[:, task.features], data[:, task.targets[1]], parameters...)
+        model = SModel(task.data[:, task.features], task.data[:, task.targets[1]], parameters...)
     end
     MLRModel(model, copy(learner.parameters))
 end
@@ -101,8 +101,8 @@ end
 """
     How to predict using a specific model
 """
-function predictᵧ(modelᵧ::MLRModel{<:SModel};
-                    data_features=nothing::Matrix, task=nothing::Task)
+function predictᵧ(modelᵧ::MLRModel{<:SModel},
+                    data_features::Matrix, task::Task)
     p = predict(modelᵧ.model, data_features)
     p, nothing
 end
@@ -110,6 +110,6 @@ end
 """
     How to learn using a specific model
 """
-function learnᵧ!(modelᵧ::MLRModel{<:SModel}; learner=nothing::Learner, data=nothing::Matrix{Real}, task=nothing::Task)
+function learnᵧ!(modelᵧ::MLRModel{<:SModel}, learner::Learner, task::Task)
     learn!(modelᵧ.model)
 end

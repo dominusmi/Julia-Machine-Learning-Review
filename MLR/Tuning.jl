@@ -67,9 +67,9 @@ end
 """
     Tunes the model
 """
-function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matrix{Real},
-                parameters_set=nothing::ParametersSet, sampler=Resampling()::Resampling,
-                measure=nothing::Function, storage=nothing::Union{Void,MLRStorage})
+function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
+                sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
+                storage=nothing::Union{Void,MLRStorage})
 
     # TODO: divide and clean up code. Use better goddam variable names.
 
@@ -103,10 +103,10 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
 
         measures = []
         for j in 1:length(trainⱼ)
-            modelᵧ = learnᵧ(lrn, task, data[trainⱼ[j], :])
-            preds, prob = predictᵧ(modelᵧ, data_features=data[testⱼ[j],task.features], task=task)
+            modelᵧ = learnᵧ(lrn, task)
+            preds, prob = predictᵧ(modelᵧ, task.data[testⱼ[j],task.features], task)
 
-            _measure = measure( data[testⱼ[j], task.targets[1]], preds)
+            _measure = measure( task.data[testⱼ[j], task.targets[1]], preds)
             push!(measures, _measure)
         end
         # Store and print cross validation results
@@ -116,20 +116,20 @@ function tune(;learner=nothing::Learner, task=nothing::Task, data=nothing::Matri
         println("Average CV accuracy: $(mean(measures))\n")
 
         update_parameters!(prms_value, prms_range)
-
     end
+    storage
 end
 
 
-function tune(multiplex::MLRMultiplex; task=nothing::Task, data=nothing::Matrix{Real},
-    sampler=Resampling()::Resampling, measure=nothing::Function,
+function tune(multiplex::MLRMultiplex, task::Task;
+    sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
-        tune(learner=multiplex.learners[i], task=task, data=data, parameters_set=multiplex.parametersSets[i],
+        tune(multiplex.learners[i], task, multiplex.parametersSets[i],
             sampler=sampler, measure=measure, storage=storage)
     end
-
+    storage
 end
 
 """

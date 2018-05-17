@@ -1,28 +1,26 @@
 include("MLJ.jl")
-include("Tuning.jl")
-
 
 # Decision trees example
 
-# include("decisiontree_wrapper.jl")
-# data = FakedataClassif(1000,3)
-#
-# task = Task(task_type="classification", targets=[4], data=data)
-# lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
-#
-# modelᵧ = learnᵧ(lrn, task, data)
-# predictᵧ(modelᵧ, data_features=data, task=task)
+include("decisiontree_wrapper.jl")
+data = FakedataClassif(1000,3)
+
+task = Task(task_type="classification", targets=[4], data=data)
+lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
+
+modelᵧ = learnᵧ(lrn, task)
+predictᵧ(modelᵧ, data[:,task.features], task)
 
 # Multivariate example
 
-# include("multivariate_wrapper.jl")
-# data = Fakedata(1000,4)
-#
-# task = Task(task_type="regression", targets=[3], data=data)
-# lrn = Learner("multivariate", Dict("regType"=>"llsq"))
-#
-# modelᵧ = learnᵧ(lrn, task, data)
-# predictᵧ(modelᵧ, data=data, task=task)
+include("multivariate_wrapper.jl")
+data = Fakedata(1000,4)
+
+task = Task(task_type="regression", targets=[3], data=data)
+lrn = Learner("multivariate", Dict("regType"=>"llsq"))
+
+modelᵧ = learnᵧ(lrn, task)
+predictᵧ(modelᵧ, data[:, task.features], task)
 
 
 
@@ -50,45 +48,45 @@ lrn = Learner("glm")
 
 storage = MLRStorage()
 
-tune(learner=lrn, task=task, data=data, parameters_set=ps,
+tune(lrn, task, ps,
     measure=mean_squared_error, storage=storage)
 #
-# include("Visualisation.jl")
+include("Visualisation.jl")
 
-# plot_storage(storage)
-## Example classification using SVM with type and cost tuning
+plot_storage(storage)
+# Example classification using SVM with type and cost tuning
 
-# include("libsvm_wrapper.jl")
-# ps = ParametersSet([
-#     ContinuousParameter(
-#         name = "cost",
-#         lower = -4,
-#         upper = 1,
-#         transform = x->10^x
-#     ),
-#     DiscreteParameter(
-#         name = "svmtype",
-#         values = [SVC()]
-#     ),
-#     DiscreteParameter(
-#         name = "kernel",
-#         values = [Kernel.Polynomial]
-#     ),
-#     ContinuousParameter(
-#         name = "coef0",
-#         lower = -4,
-#         upper = 1,
-#         transform = x->10^x
-#     ),
-# ])
-#
-# data = FakedataClassif(1000,3)
-#
-# task = Task(task_type="classification", targets=[4], data=data)
-# lrn = Learner("libsvm")
-#
-# tune(learner=lrn, task=task, data=data, parameters_set=ps,
-#     measure=accuracy)
+include("libsvm_wrapper.jl")
+ps = ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "svmtype",
+        values = [SVC()]
+    ),
+    DiscreteParameter(
+        name = "kernel",
+        values = [Kernel.Polynomial]
+    ),
+    ContinuousParameter(
+        name = "coef0",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+])
+
+data = FakedataClassif(1000,3)
+
+task = Task(task_type="classification", targets=[4], data=data)
+lrn = Learner("libsvm")
+
+tune(lrn, task, ps,
+    measure=accuracy)
 
 
 # Multiplex example
@@ -138,7 +136,7 @@ mp = MLRMultiplex(lrns, psSet)
 include("Tuning.jl")
 include("multivariate_wrapper.jl")
 include("Visualisation.jl")
-tune(mp, task=task, storage=storage, data=data, measure=mean_squared_error)
+tune(mp, task, storage=storage, measure=mean_squared_error)
 plot_storage(storage, plotting_args=Dict(:scale=>:log10))
 # modelᵧ = learnᵧ(lrn, task, data)
 # predictᵧ(modelᵧ, data_features=data, task=task)
