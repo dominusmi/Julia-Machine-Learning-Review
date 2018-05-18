@@ -126,7 +126,7 @@ immutable Stacking
     action
 end
 
-mutable CompositeLearner{T} <: Learner
+mutable struct CompositeLearner{T} <: Learner
     composite::T
     learners::Array{<:Learner}
 end
@@ -195,22 +195,24 @@ function predictᵧ(stacking::CompositeLearner{Stacking},
                 data_features::Matrix, task::Task)
 
     # TODO: add more stacking options
-    if stacking.action == "majority"
-        predictions_matrix = zeros(data_features, length(stacking.learners))
+    if stacking.composite.action == "majority"
+        predictions_matrix = zeros(size(data_features,1), length(stacking.learners))
 
         for (i,learner) in enumerate(stacking.learners)
-            p = predictᵧ(learner, data_features, task)
-            predictions_matrix[:,i] = p
+            p = predictᵧ(learner.modelᵧ, data_features, task)
+            predictions_matrix[:,i] = p[1]
         end
         for i in size(predictions_matrix,1)
             votes = Dict()
             for label in predictions_matrix[i,:]
+                println(label)
                 if label in keys(votes)
                     votes[label]+=1
                 else
                     votes[label]=1
                 end
             end
+            votes
         end
     end
 end

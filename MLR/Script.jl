@@ -205,5 +205,9 @@ task = Task(task_type="classification", targets=[5], data=data)
 storage = MLRStorage()
 tune(stacking, task, storage=storage, measure=accuracy)
 
+
 include("Visualisation.jl")
 plot_storage(storage)
+
+
+predictᵧ(stacking, data[:,task.features], task)
