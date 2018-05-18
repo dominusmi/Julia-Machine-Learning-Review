@@ -97,7 +97,7 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
         pd = parameters_dictionary(parameters_set, prms_value, discrete_prms_map)
 
         # Update learner with new parameters
-        lrn = Learner(learner.name, pd)
+        lrn = ModelLearner(learner.name, pd)
 
         # Get training/testing validation sets
         trainⱼ, testⱼ = get_samples(sampler, n_obs)
@@ -129,11 +129,11 @@ function tune(learner::Learner, task::Task;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
                 storage=nothing::Union{Void,MLRStorage})
 
-    @parallel for (key, ps) in learner.learners
-        lrn = Learner(key)
-        tune(lrn, task, ps, measure=measure, storage=storage)
-    end
 
+    for lrn in learner.learners
+        tune(lrn, task, lrn.parameters, measure=measure, storage=storage)
+    end
+    storage
 end
 
 

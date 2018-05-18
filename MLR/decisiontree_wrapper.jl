@@ -11,17 +11,23 @@ function makeDecisiontree(learner::Learner, task::Task)
         "maxdepth"=>Integer
     )
 
-    for (i, (name, value)) in enumerate(learner.parameters)
-        if possible_names[i] == name
-            if typeof(learner.parameters[name]) <: possible_parameters[name]
-                push!(parameters, learner.parameters[name])
+    no_more = false
+    for i in 1:3
+        exists = get(learner.parameters, possible_names[i], false)
+        if exists == true
+            if no_more
+                warn("DT requires that you provide maxlabels to set nsubfeatures, "*
+                      "and that you provide nsubfeatures to be able to set maxdepth."*
+                      "parameter $(possible_names[i]) was therefore not set")
             end
         else
-            if i !== length(Learner.parameters)
-                warn("DT requires that you provide maxlabels to be to set nsubfeatures"*
-                      "and that you provide nsubfeatures to be able to set maxdepth."*
-                      "parameter $(name) was therefore not set")
-            end
+            no_more = true
+        end
+    end
+
+    for (i, (name, value)) in enumerate(learner.parameters)
+        if typeof(learner.parameters[name]) <: possible_parameters[name]
+            push!(parameters, learner.parameters[name])
         end
     end
 

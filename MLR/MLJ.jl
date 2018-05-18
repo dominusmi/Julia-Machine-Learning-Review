@@ -39,24 +39,6 @@ function Task(;task_type="regression", targets=nothing, data=nothing::Matrix{<:R
     Task(TaskType(), targets, features, data)
 end
 
-"""
-    Contains the name and the parameters of the model to train.
-"""
-immutable Learner
-    name::String
-    parameters::Union{Void,Dict{Any, Any}}
-    learners::Union{Void,Vector{Learner}}
-    Learner(learner::String) = new(learner, Dict())
-    Learner(learner::String, parameters::Dict) = new(learner, parameters, nothing)
-    Learner(learners::Vector{Learner}) = new("stacking", nothing, learners)
-end
-
-function show(io::IO,l::Learner)
-    println("Learner: $(l.name)")
-    for (key, value) in l.parameters
-       println(" ▁ ▂ ▃ $key: $value")
-    end
-end
 
 """
     Allows resampling for cross validation
@@ -114,6 +96,51 @@ immutable ParametersSet
 end
 getindex(p::ParametersSet, i::Int64) = p.parameters[i]
 
+
+"""
+    Abstraction layer for model
+"""
+immutable MLRModel{T}
+    model::T
+    parameters
+    inplace::Bool
+end
+MLRModel(model, parameters; inplace=true::Bool) = MLRModel(model, parameters, inplace)
+
+
+"""
+    Contains the name and the parameters of the model to train.
+"""
+abstract type Learner end
+
+immutable ModelLearner <: Learner
+    name::String
+    parameters::Union{Void,Dict{Any, Any}, ParametersSet}
+    modelᵧ::Union{Void, MLRModel}
+    ModelLearner(learner::String) = new(learner, nothing)
+    ModelLearner(learner::String, parameters) = new(learner, parameters)
+    ModelLearner(learner::Learner, modelᵧ::MLRModel) = new(learner.name, learner.parameters, modelᵧ)
+end
+
+immutable Stacking
+    action
+end
+
+immutable CompositeLearner{T} <: Learner
+    composite::T
+    learners::Array{<:Learner}
+end
+
+function show(io::IO,l::ModelLearner)
+    println("Learner: $(l.name)")
+    if typeof(l.parameters) <: Dict
+        for (key, value) in l.parameters
+           println(" ▁ ▂ ▃ $key: $value")
+        end
+    end
+end
+
+
 """
     Structure used to record results of tuning
 """
@@ -125,15 +152,6 @@ mutable struct MLRStorage
     MLRStorage() = new([],[],Array{Float64}(0),Array{Dict}(0))
 end
 
-"""
-    Abstraction layer for model
-"""
-immutable MLRModel{T}
-    model::T
-    parameters
-    inplace::Bool
-end
-MLRModel(model, parameters; inplace=true::Bool) = MLRModel(model, parameters, inplace)
 
 
 immutable MLRMultiplex
@@ -170,6 +188,31 @@ function learnᵧ(learner::Learner, task::Task)
         modelᵧ = learnᵧ(modelᵧ, learner, task)
     end
     modelᵧ
+end
+
+
+function predictᵧ(stacking::CompositeLearner{Stacking},
+                data_features::Matrix, task::Task)
+
+    # TODO: add more stacking options
+    if stacking.action == "majority"
+        predictions_matrix = zeros(data_features, length(stacking.learners))
+
+        for (i,learner) in enumerate(stacking.learners)
+            p = predictᵧ(learner, data_features, task)
+            predictions_matrix[:,i] = p
+        end
+        for i in size(predictions_matrix,1)
+            votes = Dict()
+            for label in predictions_matrix[i,:]
+                if label in keys(votes)
+                    votes[label]+=1
+                else
+                    votes[label]=1
+                end
+            end
+        end
+    end
 end
 
 include("Tuning.jl")
