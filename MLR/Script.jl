@@ -1,4 +1,15 @@
 include("MLJ.jl")
+data = Fakedata(1000,4)
+
+function _auto(cost)
+    task = Task(task_type="regression", targets=[3], data=data)
+    lrn = Learner("glm", Dict("penalty"=>L1Penalty(), "λ"=>cost))
+
+    modelᵧ = learnᵧ(lrn, task)
+    println(modelᵧ.model)
+    p = predictᵧ(modelᵧ, data[:, task.features], task)
+    mean_squared_error( data[:, task.targets[1]], p[1] )
+end
 
 # Decision trees example
 
@@ -30,7 +41,7 @@ include("glm_wrapper.jl")
 
 ps = ParametersSet([
     ContinuousParameter(
-        name = "cost",
+        name = "λ",
         lower = -4,
         upper = 1,
         transform = x->10^x
@@ -43,7 +54,7 @@ ps = ParametersSet([
 
 data = Fakedata(1000,3)
 
-task = Task(task_type="classification", targets=[4], data=data)
+task = Task(task_type="regression", targets=[4], data=data)
 lrn = Learner("glm")
 
 storage = MLRStorage()

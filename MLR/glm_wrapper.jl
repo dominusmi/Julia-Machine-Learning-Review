@@ -67,17 +67,17 @@ function makeGlm(learner::Learner, task::Task)
         model = SModel(task.data[:, task.features], task.data[:, task.targets])
     else
         parameters = []
-        if get(learner.parameters, :λ, false) !== false
+        if get(learner.parameters, "λ", false) !== false
             # Add λ
             push!(parameters, get_λ(learner.parameters, task))
         end
-        if get(learner.parameters, :penalty, false) !== false
+        if get(learner.parameters, "penalty", false) !== false
             # Add penalty
-            push!(parameters, learner.parameters[:penalty])
+            push!(parameters, learner.parameters["penalty"])
         end
-        if get(learner.parameters, :loss, false) !== false
+        if get(learner.parameters, "loss", false) !== false
             # Add penalty
-            push!(parameters, learner.parameters[:loss])
+            push!(parameters, learner.parameters["loss"])
         end
         model = SModel(task.data[:, task.features], task.data[:, task.targets[1]], parameters...)
     end
@@ -88,10 +88,10 @@ end
 function get_λ(parameters, task::Task)
     if get(parameters, "λ", false) == false
         lambda = fill(0.0, task.features)
-    elseif typeof(parameters["λ"]["type"]) <: Real
-        lambda = fill(parameters["λ"]["type"], length(task.features) )
-    elseif typeof(parameters["λ"]["type"]) <: Vector{Float64}
-        lambda = copy(parameters["λ"]["type"])
+    elseif typeof(parameters["λ"]) <: Real
+        lambda = fill(parameters["λ"], length(task.features) )
+    elseif typeof(parameters["λ"]["type"]) <: Vector{Real}
+        lambda = copy(parameters["λ"])
     end
     lambda
 end
