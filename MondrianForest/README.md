@@ -9,6 +9,10 @@
 - [ ] [MLJ](https://github.com/dominusmi/warwick-rsg/tree/master/MLR) interface
 - [ ] Make beautiful
 
+### Gif of splits
+
+![alt text](resources/MT.gif)
+
 ### [Comparisons](https://github.com/dominusmi/warwick-rsg/tree/master/MondrianForest/comparisons)
 
 ![alt text](https://github.com/dominusmi/warwick-rsg/blob/master/MondrianForest/comparisons/n_data_scale.png)

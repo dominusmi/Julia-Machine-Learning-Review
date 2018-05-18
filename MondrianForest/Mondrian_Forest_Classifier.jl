@@ -4,58 +4,59 @@ include("Mondrian_Tree.jl")
 
 mutable struct Mondrian_Tree_Classifier
     Tree::Mondrian_Tree
-    λ::Float64                              # lifetime parameter set to inf in paper and 1e9 in implementations (e.g pythons)
-    γ::Real                                 # Hierachy of normailized stable processes discount parameter 10*Dimensionality of data in the paper
     X::Array{Float64,N} where N                     # training data
     Y::Array{Int}                           # training labels
 end
 
-function Mondrian_Tree_Classifier(Tree::Mondrian_Tree)
-    return Mondrian_Tree_Classifier(Tree,1e9,0,[],[])
+function Mondrian_Tree_Classifier()
+    return Mondrian_Tree_Classifier(Mondrian_Tree(),[],[])
 end
 
-function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,λ::Float64)
-    return Mondrian_Tree_Classifier(Tree,λ,0,[],[])
+function Mondrian_Tree_Classifier(Tree::Mondrian_Tree)
+    return Mondrian_Tree_Classifier(Tree,[],[])
 end
 
 function Mondrian_Tree_Classifier(Tree::Mondrian_Tree,
-                                  λ::Float64,
                                   X::Array{Float64,N} where N,
                                   Y::Array{Int64})
-    return Mondrian_Tree_Classifier(Tree,λ,0,X,Y)
+    return Mondrian_Tree_Classifier(Tree,X,Y)
 end
 
 ### Mondrian Forest Classifier Definitions
 
 mutable struct Mondrian_Forest_Classifier   # currently trees in the forest just use default params same as in the paper
     n_trees::Int64                          # number of trees in the forest
-    Trees::Array{Mondrian_Tree}
+    Trees::Array{Mondrian_Tree_Classifier,1}
     X::Array{Float64,2}
     Y::Array{Int}
 end
 
 function Mondrian_Forest_Classifier(n_trees::Int64=10)
-    return Mondrian_Forest_Classifier(n_trees,
-                                    Array{Mondrian_Tree,1}(),
+    MF = Mondrian_Forest_Classifier(n_trees,
+                                    Array{Mondrian_Tree_Classifier,1}(),
                                     Array{Float64,2}(0,0),
                                     Array{Int}(0))
+    MF.Trees = Array{Mondrian_Tree_Classifier,1}()
+    return MF
 end
 
 ### Mondrian Tree Training and Prediction
 
-function train!(Tree::Mondrian_Tree,
+function train!(MT::Mondrian_Tree_Classifier,
                 X::Array{Float64,N} where N,
                 Y::Array{Int64},
                 λ=1e9)
-    Sample_Mondrian_Tree!(Tree,λ,X,Y)
-    compute_predictive_posterior_distribution!(Tree,10*size(X,2))   # TODO get rid of this override
+    Sample_Mondrian_Tree!(MT.Tree,λ,X,Y)
+    compute_predictive_posterior_distribution!(MT.Tree,10*size(X,2))   # TODO get rid of this override
+    MT.X = X
+    MT.Y = Y
 end
 
-function predict!(Tree::Mondrian_Tree,      # batch prediction NB supposedly can change tree structure!
+function predict!(MT::Mondrian_Tree_Classifier,      # batch prediction NB supposedly can change tree structure!
                   X::Array{Float64,N} where N)
     pred = []
     for i in 1:size(X,1)
-        p = predict!(Tree,X[i,:],10*size(X,2))
+        p = predict!(MT.Tree,X[i,:],10*size(X,2))
         if p[1] > p[2]
             push!(pred,1)
         else
@@ -65,11 +66,11 @@ function predict!(Tree::Mondrian_Tree,      # batch prediction NB supposedly can
     return pred
 end
 
-function predict_proba!(Tree::Mondrian_Tree,      # batch prediction NB supposedly can change tree structure!
+function predict_proba!(MT::Mondrian_Tree_Classifier,      # batch prediction NB supposedly can change tree structure!
                         X::Array{Float64,2})
     pred = []
     for i in 1:size(X,1)
-        push!(pred,predict!(Tree,X[i,:],10*size(X,2)))
+        push!(pred,predict!(MT.Tree,X[i,:],10*size(X,2)))
     end
     return pred
 end
@@ -81,17 +82,18 @@ function train!(MF::Mondrian_Forest_Classifier,
                 Y::Array{Int64},
                 λ::Float64=1e9)
     @parallel for i in 1:MF.n_trees
-        Tree = Mondrian_Tree()
-        train!(Tree, X, Y, λ)
-        push!(MF.Trees,Tree)
+        push!(MF.Trees,Mondrian_Tree_Classifier())
+        train!(MF.Trees[end], X, Y, λ)
     end
+    MF.X = X
+    MF.Y = Y
 end
 
 function predict!(MF::Mondrian_Forest_Classifier,
                   X::Array{Float64,2})
     pred = zeros(MF.n_trees,size(X,1))
-    for i in 1:MF.n_trees
-        pred[i,:] = predict!(MF.Trees[i], X)
+    for item in enumerate(MF.Trees)
+        pred[item[1],:] = predict!(item[2], X)
     end
     p = Array{Int,1}(size(X,1))
     for i in 1:size(X,1)
@@ -106,13 +108,13 @@ function predict_proba!(MF::Mondrian_Forest_Classifier,
     for i in 1:size(X,1)
         push!(pred,[0.0,0.0])
     end
-    for i in 1:length(MF.Trees)
-        p=predict_proba!(MF.Trees[i], X)
+    for trees in enumerate(MF.Trees)
+        p=predict_proba!(trees[2], X)
         for item in enumerate(p)
             pred[item[1]] += item[2]
         end
     end
-    return pred/length(MF.Trees)
+    return pred/MF.n_trees
 end
 
 ## For testing
@@ -147,4 +149,79 @@ function print_mondrian_tree(node::Mondrian_Node, depth=-1, indent=0)
     print_mondrian_tree(get(node.left), depth, indent + 1)
     print("    " ^ indent * "R-> ")
     print_mondrian_tree(get(node.right), depth, indent + 1)
+end
+
+# returns either a plot of the splits (with and witout training data)
+# or optionally an animation
+
+function show_mondrian_split_2d(MT::Mondrian_Tree_Classifier;
+                                times=false,
+                                Data=false,
+                                animation=false)
+
+    fig = plot()
+    τ = []
+    ζ = []
+    δ = []
+    nodes = []
+    push!(τ,get(MT.Tree.root).τ)
+    push!(ζ,get(get(MT.Tree.root).ζ))
+    push!(δ,get(get(MT.Tree.root).δ))
+    push!(nodes, get(MT.Tree.root))
+    for l in MT.Tree.leaves
+        j = get(l.parent)
+        while j.node_type[3] != true
+            if (j in nodes)
+                break
+            end
+            push!(τ, j.τ)
+            push!(ζ, get(j.ζ))
+            push!(δ, get(j.δ))
+            push!(nodes,j)
+            j = get(j.parent)
+        end
+    end
+    indices = sortperm(τ)
+    τ = τ[indices]
+    ζ = ζ[indices]
+    δ = δ[indices]
+    nodes = nodes[indices]
+
+    anim = Animation()
+    if animation
+        frame_numbers = collect(1:size(ζ,1))
+    else
+        frame_numbers = size(ζ)
+    end
+    for i in 1:size(ζ,1)
+        if (i==1)
+            if (Data)
+                scatter!(fig,MT.X[MT.Y.==1,1],MT.X[MT.Y.==1,2], color="red", label="Class 1", markershape=:circle)
+                scatter!(fig,MT.X[MT.Y.==2,1],MT.X[MT.Y.==2,2], color="green", label="Class 2", markershape=:square)
+            end
+            int = get(nodes[1].Θ).Intervals
+            xlims!(fig,int[1,1],int[1,2])
+            ylims!(fig,int[2,1],int[2,2])
+            title!(fig,"Mondrian Tree Partitions")
+        end
+        int = get(nodes[i].Θ).Intervals
+        if times
+            label = round(τ[i],3)
+        else
+            label = ""
+        end
+        if (δ[i] == 1)
+            x = linspace(int[2,1],int[2,2],20)
+            plot!(fig,fill(ζ[i],length(x)),x, label="")
+            annotate!([(ζ[i], median(x), text(label,6))])
+        else
+            x = linspace(int[1,1],int[1,2],20)
+            plot!(fig,x,fill(ζ[i],length(x)), label="")
+            annotate!([(median(x),ζ[i], text(label,6))])
+        end
+        if i in frame_numbers
+            frame(anim)
+        end
+    end
+    return fig,anim
 end
