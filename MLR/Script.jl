@@ -25,7 +25,6 @@ predictᵧ(modelᵧ, data[:, task.features], task)
 
 
 ## Example regression using GLM with penalty and λ tuning
-
 include("glm_wrapper.jl")
 
 ps = ParametersSet([
@@ -48,8 +47,7 @@ lrn = ModelLearner("glm")
 
 storage = MLRStorage()
 
-tune(lrn, task, ps,
-    measure=mean_squared_error, storage=storage)
+tt = tune(lrn, task, ps, measure=mean_squared_error, storage=storage)
 #
 include("Visualisation.jl")
 

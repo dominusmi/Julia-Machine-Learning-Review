@@ -126,7 +126,7 @@ immutable Stacking
     action
 end
 
-immutable CompositeLearner{T} <: Learner
+mutable CompositeLearner{T} <: Learner
     composite::T
     learners::Array{<:Learner}
 end

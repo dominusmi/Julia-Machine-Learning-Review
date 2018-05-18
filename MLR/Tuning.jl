@@ -70,7 +70,7 @@ end
 """
 function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
-                storage=nothing::Union{Void,MLRStorage})
+                storage=MLRStorage()::MLRStorage)
 
     # TODO: divide and clean up code. Use better goddam variable names.
 
@@ -118,22 +118,34 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
 
         update_parameters!(prms_value, prms_range)
     end
-    storage
+
+    println("Retraining best model")
+    if typeof(task) <: Task{RegressionTask}
+        best_index = indmin(storage.averageCV)
+    else
+        best_index = indmax(storage.averageCV)
+    end
+    lrn = ModelLearner(storage.models[best_index], storage.parameters[best_index])
+    modelᵧ = learnᵧ(lrn, task)
+    lrn = ModelLearner(lrn, modelᵧ)
+
+    lrn
 end
 
 """
     This should be called only when the learner is a stacking
     TODO: Make structure clearer
 """
-function tune(learner::Learner, task::Task;
+function tune(learner::CompositeLearner, task::Task;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
-                storage=nothing::Union{Void,MLRStorage})
+                storage=MLRStorage()::MLRStorage)
 
 
-    for lrn in learner.learners
-        tune(lrn, task, lrn.parameters, measure=measure, storage=storage)
+    for (i,lrn) in enumerate(learner.learners)
+        new_lrn = tune(lrn, task, lrn.parameters, measure=measure)
+        learner.learners[i] = new_lrn
     end
-    storage
+    learner
 end
 
 
