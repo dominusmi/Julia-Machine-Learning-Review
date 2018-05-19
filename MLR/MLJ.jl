@@ -122,8 +122,16 @@ immutable ModelLearner <: Learner
     ModelLearner(learner::Learner, modelᵧ::MLRModel) = new(learner.name, learner.parameters, modelᵧ)
 end
 
+
+global const MAJORITY = 1
+
+"""
+    Stacking learner. Must be used with CompositeLearner{T}.
+    @vars
+        vote_type: type of voting, currently only "majority" accepted
+"""
 immutable Stacking
-    action
+    voting_type::Integer
 end
 
 mutable struct CompositeLearner{T} <: Learner
@@ -154,7 +162,7 @@ end
 
 
 
-immutable MLRMultiplex
+mutable struct MLRMultiplex
     learners::Array{Learner}
     parametersSets::Array{ParametersSet}
     size::Integer
@@ -190,34 +198,17 @@ function learnᵧ(learner::Learner, task::Task)
     modelᵧ
 end
 
-
-function predictᵧ(stacking::CompositeLearner{Stacking},
+"""
+    Allows to predict using learner instead of model.
+"""
+function predictᵧ(learner::ModelLearner,
                 data_features::Matrix, task::Task)
 
-    # TODO: add more stacking options
-    if stacking.composite.action == "majority"
-        predictions_matrix = zeros(size(data_features,1), length(stacking.learners))
-
-        for (i,learner) in enumerate(stacking.learners)
-            p = predictᵧ(learner.modelᵧ, data_features, task)
-            predictions_matrix[:,i] = p[1]
-        end
-        for i in size(predictions_matrix,1)
-            votes = Dict()
-            for label in predictions_matrix[i,:]
-                println(label)
-                if label in keys(votes)
-                    votes[label]+=1
-                else
-                    votes[label]=1
-                end
-            end
-            votes
-        end
-    end
+    predictᵧ(learner.modelᵧ, data_features, task)
 end
 
 include("Tuning.jl")
+include("Stacking.jl")
 include("Resampling.jl")
 include("Storage.jl")
 include("Utilities.jl")

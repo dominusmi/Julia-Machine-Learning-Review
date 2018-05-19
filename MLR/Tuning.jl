@@ -133,10 +133,10 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
 end
 
 """
-    This should be called only when the learner is a stacking
+    This should be called only when the learner is a stacking compositve
     TODO: Make structure clearer
 """
-function tune(learner::CompositeLearner, task::Task;
+function tune(learner::CompositeLearner{<:Stacking}, task::Task;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
                 storage=MLRStorage()::MLRStorage)
 
@@ -148,16 +148,18 @@ function tune(learner::CompositeLearner, task::Task;
     learner
 end
 
-
+"""
+    Tune for multiplex type
+"""
 function tune(multiplex::MLRMultiplex, task::Task;
     sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
-        tune(multiplex.learners[i], task, multiplex.parametersSets[i],
-            sampler=sampler, measure=measure, storage=storage)
+        multiplex.learners[i]  = tune(multiplex.learners[i], task, multiplex.parametersSets[i],
+                                        sampler=sampler, measure=measure, storage=storage)
     end
-    storage
+
 end
 
 """

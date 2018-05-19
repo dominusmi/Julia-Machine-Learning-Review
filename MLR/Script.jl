@@ -200,14 +200,35 @@ push!(lrns, ModelLearner("libsvm", ParametersSet([
 ])))
 
 data = FakedataClassif(1000,4)
-stacking = CompositeLearner(Stacking("majority"), lrns)
-task = Task(task_type="classification", targets=[5], data=data)
+stacking = CompositeLearner(Stacking(MAJORITY), lrns)
+task = Task(task_type="classification", targets=[3], data=data)
 storage = MLRStorage()
 tune(stacking, task, storage=storage, measure=accuracy)
+
+pp = predictᵧ(stacking, data[:,task.features], task)
+
+accuracy(pp, data[:,task.targets[1]])
 
 
 include("Visualisation.jl")
 plot_storage(storage)
 
 
-predictᵧ(stacking, data[:,task.features], task)
+x = zeros(20,2)
+y = zeros(Int64, 20,1)
+for i in 1:10
+    x[i,:] = [rand(), 1]
+    y[i] = 0
+end
+
+for i in 11:20
+    x[i,:] = [rand(), 0]
+    y[i] = 1
+end
+y[3] = 1
+
+using Plots
+scatter(x,y, color=y)
+
+
+data = hcat(x,y)
