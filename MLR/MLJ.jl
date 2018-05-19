@@ -120,7 +120,7 @@ immutable ModelLearner <: Learner
     ModelLearner(learner::String) = new(learner, nothing)
     ModelLearner(learner::String, parameters) = new(learner, parameters)
     ModelLearner(learner::Learner, modelᵧ::MLRModel) = new(learner.name, learner.parameters, modelᵧ)
-    ModelLearner(learner::Learner, modelᵧ::MLRModel, parameters::ParameterSet) = new(learner.name, parameters, modelᵧ)
+    ModelLearner(learner::Learner, modelᵧ::MLRModel, parameters::ParametersSet) = new(learner.name, parameters, modelᵧ)
 
 end
 

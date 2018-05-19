@@ -201,7 +201,7 @@ push!(lrns, ModelLearner("libsvm", ParametersSet([
 
 data = FakedataClassif(1000,4)
 stacking = CompositeLearner(Stacking(MAJORITY), lrns)
-task = Task(task_type="classification", targets=[3], data=data)
+task = Task(task_type="classification", targets=[5], data=data)
 storage = MLRStorage()
 tune(stacking, task, storage=storage, measure=accuracy)
 

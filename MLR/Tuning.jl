@@ -128,7 +128,7 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
     end
     lrn = ModelLearner(storage.models[best_index], storage.parameters[best_index])
     modelᵧ = learnᵧ(lrn, task)
-    lrn = ModelLearner(lrn, parameters_set, modelᵧ)
+    lrn = ModelLearner(lrn, modelᵧ, parameters_set)
 
     lrn
 end
