@@ -66,7 +66,8 @@ end
 
 
 """
-    Tunes the model
+    Tunes learner given a task and parameter sets.
+    Returns a learner which contains best tuned model
 """
 function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
@@ -127,26 +128,12 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
     end
     lrn = ModelLearner(storage.models[best_index], storage.parameters[best_index])
     modelᵧ = learnᵧ(lrn, task)
-    lrn = ModelLearner(lrn, modelᵧ)
+    lrn = ModelLearner(lrn, parameters_set, modelᵧ)
 
     lrn
 end
 
-"""
-    This should be called only when the learner is a stacking compositve
-    TODO: Make structure clearer
-"""
-function tune(learner::CompositeLearner{<:Stacking}, task::Task;
-                sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
-                storage=MLRStorage()::MLRStorage)
 
-
-    for (i,lrn) in enumerate(learner.learners)
-        new_lrn = tune(lrn, task, lrn.parameters, measure=measure)
-        learner.learners[i] = new_lrn
-    end
-    learner
-end
 
 """
     Tune for multiplex type

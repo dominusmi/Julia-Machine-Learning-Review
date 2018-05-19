@@ -1,3 +1,18 @@
+"""
+    Tuning for stacking compositve learner
+"""
+function tune(learner::CompositeLearner{<:Stacking}, task::Task;
+                sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
+                storage=MLRStorage()::MLRStorage)
+
+
+    for (i,lrn) in enumerate(learner.learners)
+        new_lrn = tune(lrn, task, lrn.parameters, measure=measure)
+        learner.learners[i] = new_lrn
+    end
+    learner
+end
+
 function predictᵧ(stacking::CompositeLearner{Stacking},
                 data_features::Matrix, task::Task)
 
