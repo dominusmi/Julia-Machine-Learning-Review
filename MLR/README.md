@@ -18,3 +18,5 @@ without losing any of the features.
 - [ ] Add compatibility with multiple targets
 - [x] Add multivariable regression methods
 - [x] Add automatic labelling for classifiers
+
+Notes: Forward diff does not work

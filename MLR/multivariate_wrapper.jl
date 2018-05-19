@@ -6,13 +6,13 @@ using MultivariateStats
 abstract type  MultivariateModel end
 
 mutable struct MultivariateLlsq <: MultivariateModel
-    sol::Matrix{<:Float64}
+    sol::Matrix
     MultivariateLlsq() = new(zeros(0,0))
 end
 
 mutable struct MultivariateRidge <: MultivariateModel
-    λ::Float64
-    sol::Matrix{<:Float64}
+    λ::Number
+    sol::Matrix
     MultivariateRidge(λ) = new(λ, zeros(0,0))
 end
 

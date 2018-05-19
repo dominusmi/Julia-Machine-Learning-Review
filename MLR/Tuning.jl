@@ -64,12 +64,14 @@ function prepare_parameters!(prms_set, prms_value, prms_range, discrete_prms_map
     total_parameters
 end
 
+
 """
-    Tunes the model
+    Tunes learner given a task and parameter sets.
+    Returns a learner which contains best tuned model
 """
 function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
                 sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
-                storage=nothing::Union{Void,MLRStorage})
+                storage=MLRStorage()::MLRStorage)
 
     # TODO: divide and clean up code. Use better goddam variable names.
 
@@ -96,7 +98,7 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
         pd = parameters_dictionary(parameters_set, prms_value, discrete_prms_map)
 
         # Update learner with new parameters
-        lrn = Learner(learner.name, pd)
+        lrn = ModelLearner(learner.name, pd)
 
         # Get training/testing validation sets
         trainⱼ, testⱼ = get_samples(sampler, n_obs)
@@ -117,19 +119,34 @@ function tune(learner::Learner, task::Task, parameters_set::ParametersSet;
 
         update_parameters!(prms_value, prms_range)
     end
-    storage
+
+    println("Retraining best model")
+    if typeof(task) <: Task{RegressionTask}
+        best_index = indmin(storage.averageCV)
+    else
+        best_index = indmax(storage.averageCV)
+    end
+    lrn = ModelLearner(storage.models[best_index], storage.parameters[best_index])
+    modelᵧ = learnᵧ(lrn, task)
+    lrn = ModelLearner(lrn, modelᵧ, parameters_set)
+
+    lrn
 end
 
 
+
+"""
+    Tune for multiplex type
+"""
 function tune(multiplex::MLRMultiplex, task::Task;
     sampler=Resampling()::Resampling, measure=MLMetrics.accuracy::Function,
     storage=nothing::Union{Void,MLRStorage})
 
     for i in 1:multiplex.size
-        tune(multiplex.learners[i], task, multiplex.parametersSets[i],
-            sampler=sampler, measure=measure, storage=storage)
+        multiplex.learners[i]  = tune(multiplex.learners[i], task, multiplex.parametersSets[i],
+                                        sampler=sampler, measure=measure, storage=storage)
     end
-    storage
+
 end
 
 """

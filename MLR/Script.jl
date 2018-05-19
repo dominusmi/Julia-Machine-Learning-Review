@@ -6,7 +6,7 @@ include("decisiontree_wrapper.jl")
 data = FakedataClassif(1000,3)
 
 task = Task(task_type="classification", targets=[4], data=data)
-lrn = Learner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
+lrn = ModelLearner("forest", Dict("nsubfeatures"=>2, "ntrees"=>10))
 
 modelᵧ = learnᵧ(lrn, task)
 predictᵧ(modelᵧ, data[:,task.features], task)
@@ -25,12 +25,11 @@ predictᵧ(modelᵧ, data[:, task.features], task)
 
 
 ## Example regression using GLM with penalty and λ tuning
-
 include("glm_wrapper.jl")
 
 ps = ParametersSet([
     ContinuousParameter(
-        name = "cost",
+        name = "λ",
         lower = -4,
         upper = 1,
         transform = x->10^x
@@ -43,13 +42,12 @@ ps = ParametersSet([
 
 data = Fakedata(1000,3)
 
-task = Task(task_type="classification", targets=[4], data=data)
-lrn = Learner("glm")
+task = Task(task_type="regression", targets=[4], data=data)
+lrn = ModelLearner("glm")
 
 storage = MLRStorage()
 
-tune(lrn, task, ps,
-    measure=mean_squared_error, storage=storage)
+tt = tune(lrn, task, ps, measure=mean_squared_error, storage=storage)
 #
 include("Visualisation.jl")
 
@@ -146,3 +144,91 @@ plot_storage(storage, plotting_args=Dict(:scale=>:log10))
 #
 # modelᵧ = learnᵧ(lrn, task, data)
 # predictᵧ(modelᵧ, data=data, task=task)
+
+
+# Stacking
+include("MLJ.jl")
+include("Tuning.jl")
+include("multivariate_wrapper.jl")
+include("glm_wrapper.jl")
+include("decisiontree_wrapper.jl")
+include("libsvm_wrapper.jl")
+lrns = Array{Learner,1}(0)
+push!(lrns, ModelLearner("decisiontree", ParametersSet([
+    ContinuousParameter(
+        name="maxlabels",
+        lower = 1,
+        upper = 4,
+        transform = x->x
+    ),
+    ContinuousParameter(
+        name="nsubfeatures",
+        lower = 2,
+        upper = 3,
+        transform = x->x
+    ),
+    ContinuousParameter(
+        name = "maxdepth",
+        lower = 3,
+        upper = 12,
+        transform = x->x
+    )
+])))
+push!(lrns, ModelLearner("libsvm", ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "svmtype",
+        values = [SVC()]
+    )
+])))
+push!(lrns, ModelLearner("libsvm", ParametersSet([
+    ContinuousParameter(
+        name = "cost",
+        lower = -4,
+        upper = 1,
+        transform = x->10^x
+    ),
+    DiscreteParameter(
+        name = "svmtype",
+        values = [NuSVC()]
+    )
+])))
+
+data = FakedataClassif(1000,4)
+stacking = CompositeLearner(Stacking(MAJORITY), lrns)
+task = Task(task_type="classification", targets=[5], data=data)
+storage = MLRStorage()
+tune(stacking, task, storage=storage, measure=accuracy)
+
+pp = predictᵧ(stacking, data[:,task.features], task)
+
+accuracy(pp, data[:,task.targets[1]])
+
+
+include("Visualisation.jl")
+plot_storage(storage)
+
+
+x = zeros(20,2)
+y = zeros(Int64, 20,1)
+for i in 1:10
+    x[i,:] = [rand(), 1]
+    y[i] = 0
+end
+
+for i in 11:20
+    x[i,:] = [rand(), 0]
+    y[i] = 1
+end
+y[3] = 1
+
+using Plots
+scatter(x,y, color=y)
+
+
+data = hcat(x,y)
