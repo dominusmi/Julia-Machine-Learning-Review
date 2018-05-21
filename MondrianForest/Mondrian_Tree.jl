@@ -65,12 +65,13 @@ function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
                                X::Array{Float64,N} where N,
                                Y::Array{Int64})
     # initialise the tree
+    classes = unique(Y)
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(X))
     e.Θ = Θ
-    get_count(e,Y, 2)
-    e.Gₚ = zeros(2)
+    get_count(e,Y,length(classes))
+    e.Gₚ = zeros(length(classes))
     Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y)
     return Tree
 end
@@ -171,10 +172,6 @@ function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim
 end
 # returns any data from D contained in the boxes of Θ
 function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N)
-    # this function cause large memory allocation according
-    # to @time but the system does not record any
-    # large memory allocation -> ram does not get increased
-    # at all!
     indices = []
     include = false
     for i in 1:size(X,1)
