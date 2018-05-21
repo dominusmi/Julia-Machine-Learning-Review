@@ -4,6 +4,7 @@
 
 - [x] Off-line algorithm
 - [x] On-line algorithm
+- [ ] Regression
 - [ ] Optimise (parallelisation)
 - [ ] JuliaDB support
 - [ ] [MLJ](https://github.com/dominusmi/warwick-rsg/tree/master/MLR) interface
