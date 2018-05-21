@@ -14,6 +14,10 @@
 
 ![alt text](resources/MT.gif)
 
+### Regression Exampels
+
+![alt text](resources/MF_REG.png)
+
 ### [Comparisons](https://github.com/dominusmi/warwick-rsg/tree/master/MondrianForest/comparisons)
 
 ![alt text](https://github.com/dominusmi/warwick-rsg/blob/master/MondrianForest/comparisons/n_data_scale.png)
