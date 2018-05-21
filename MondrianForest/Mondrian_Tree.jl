@@ -17,6 +17,9 @@ mutable struct Mondrian_Node
     c::Array{Int}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
     Gₚ::Array{Float64}              # posterior mean (predictive probability)
     indices::Array{Int64}           # stores relevant data points dependent on Θ
+    w::Float64                      # regression weight
+    m::Float64                      # regression mean
+    v::Float64                      # regression variance
 end
 
 # construction
@@ -33,7 +36,10 @@ function Mondrian_Node(τ::Float64, node_type::Array{Bool,1})
                       Array{Int}(),
                       Array{Int}(),
                       Array{Float64}(),
-                      Array{Int64}())
+                      Array{Int64}(),
+                      0.0,
+                      0.0,
+                      0.0)
     return N
 end
 
@@ -43,6 +49,8 @@ mutable struct Mondrian_Tree
     leaves::Array{Mondrian_Node,1}
 end
 
+# constructors
+
 function Mondrian_Tree()
     return Mondrian_Tree(Nullable{Mondrian_Node}(),Array{Mondrian_Node,1}())
 end
@@ -51,6 +59,8 @@ function Mondrian_Tree(N::Mondrian_Node)
     return Mondrian_Tree(N,Array{Mondrian_Node,1}())
 end
 
+# for updating the tab and count during the sampling
+# instead of posterior counts
 function get_count(j::Mondrian_Node, Y::Array{Int64}, class_num::Int64)
     j.tab = zeros(class_num)
     j.c = zeros(class_num)
@@ -59,6 +69,13 @@ function get_count(j::Mondrian_Node, Y::Array{Int64}, class_num::Int64)
         j.tab[i] = min(j.c[i],1)
     end
 end
+
+"""
+`function Sample_Mondrian_Tree!(Tree::Mondrian_Tree, λ::Float64, X::Array{Float64,N} where N, Y::Array{Int64})`
+
+The function *samples* an empty mondrian tree object on the data X with labels Y with
+a time limit λ on the underlying mondrian process.
+"""
 
 function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
                                λ::Float64,
@@ -75,6 +92,18 @@ function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
     Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y)
     return Tree
 end
+
+"""
+`function Sample_Mondrian_Block!(j::Mondrian_Node,
+                                Θ::Axis_Aligned_Box,
+                                λ::Float64,
+                                Tree::Mondrian_Tree,
+                                X::Array{Float64,N} where N,
+                                Y::Array{Int64})`
+
+Called by `Sample_Mondrian_Tree` (use that). A recursive functions
+to sample the splits of the mondrian tree.
+"""
 
 function Sample_Mondrian_Block!(j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
@@ -156,6 +185,13 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
     end
 end
 
+"""
+`function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim::Int64)`
+
+Determines the data points within a given box, used for
+stopping `Sample_Mondrian_Block` when no data points are present.
+Only checks one dimension dim.
+"""
 # only check indices against the changed dimension CF lines 93-97
 function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim::Int64)
     # this function cause large memory allocation according
@@ -170,6 +206,13 @@ function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim
     end
     return indices
 end
+
+"""
+`function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N, dim::Int64)`
+
+Determines the data points within a given box, used for
+stopping `Sample_Mondrian_Block` when no data points are present.
+"""
 # returns any data from D contained in the boxes of Θ
 function get_data_indices(Θ::Axis_Aligned_Box, X::Array{Float64,N} where N)
     indices = []
@@ -191,6 +234,14 @@ end
 
 # gamma is usually set to 10*dimensionality
 # which is done above somewhere
+
+"""
+`function compute_predictive_posterior_distribution!(Tree::Mondrian_Tree,
+                                                    γ::Real)`
+
+Sets the predictions Gₚ for a sampled mondrian tree. Must
+be run before prediction.
+"""
 function compute_predictive_posterior_distribution!(Tree::Mondrian_Tree,
                                                     γ::Real)
     J = [get(Tree.root)]
@@ -217,6 +268,12 @@ function compute_predictive_posterior_distribution!(Tree::Mondrian_Tree,
 end
 
 # predict te class probs
+"""
+`function predict!(Tree::Mondrian_Tree,
+                  x::Array{Float64},
+                  γ::Real)`
+Predicts the class of new data instance x, not batch.
+"""
 function predict!(Tree::Mondrian_Tree,
                   x::Array{Float64},
                   γ::Real)
