@@ -13,10 +13,16 @@ without losing any of the features.
 - [x] Basic custom sampling method (K-fold)
 - [x] Basic CV with custom score
 - [x] Wrap at least a handful of models for regression & classification
+- [x] Add multivariable regression methods
+- [x] Add automatic labelling for classifiers
 - [ ] Find a way to make it clear what arguments a model expects
 - [ ] Allow any sampling methods from `MLBase.jl`
 - [ ] Add compatibility with multiple targets
-- [x] Add multivariable regression methods
-- [x] Add automatic labelling for classifiers
+
+
+**Known Issues:**
+- [ ] Fix stacking storage
+- [ ] Get packages change Float to AbstractFloat so that forward diff can work
+
 
 Notes: Forward diff does not work

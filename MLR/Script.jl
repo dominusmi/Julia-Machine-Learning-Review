@@ -17,7 +17,7 @@ include("multivariate_wrapper.jl")
 data = Fakedata(1000,4)
 
 task = Task(task_type="regression", targets=[3], data=data)
-lrn = Learner("multivariate", Dict("regType"=>"llsq"))
+lrn = ModelLearner("multivariate", Dict("regType"=>"llsq"))
 
 modelᵧ = learnᵧ(lrn, task)
 predictᵧ(modelᵧ, data[:, task.features], task)
@@ -47,11 +47,12 @@ lrn = ModelLearner("glm")
 
 storage = MLRStorage()
 
-tt = tune(lrn, task, ps, measure=mean_squared_error, storage=storage)
-#
+lrn = tune(lrn, task, ps, measure=mean_squared_error, storage=storage)
+
 include("Visualisation.jl")
 
 plot_storage(storage)
+
 # Example classification using SVM with type and cost tuning
 
 include("libsvm_wrapper.jl")
@@ -81,10 +82,9 @@ ps = ParametersSet([
 data = FakedataClassif(1000,3)
 
 task = Task(task_type="classification", targets=[4], data=data)
-lrn = Learner("libsvm")
+lrn = ModelLearner("libsvm")
 
-tune(lrn, task, ps,
-    measure=accuracy)
+lrn = tune(lrn, task, ps, measure=accuracy)
 
 
 # Multiplex example
@@ -139,16 +139,6 @@ include("multivariate_wrapper.jl")
 include("Visualisation.jl")
 tune(mp, task, storage=storage, measure=mean_squared_error)
 plot_storage(storage, plotting_args=Dict(:scale=>:log10))
-
-
-# modelᵧ = learnᵧ(lrn, task, data)
-# predictᵧ(modelᵧ, data_features=data, task=task)
-
-# Multivariate example
-
-#
-# modelᵧ = learnᵧ(lrn, task, data)
-# predictᵧ(modelᵧ, data=data, task=task)
 
 
 # Stacking
@@ -218,6 +208,9 @@ accuracy(pp, data[:,task.targets[1]])
 include("Visualisation.jl")
 plot_storage(storage)
 
+
+
+# Different fake data for classification checks
 
 x = zeros(20,2)
 y = zeros(Int64, 20,1)
