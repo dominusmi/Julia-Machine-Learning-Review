@@ -9,7 +9,7 @@ mutable struct Axis_Aligned_Box
 end
 
 # constructor with intervals
-function Axis_Aligned_Box(Intervals::Array{Float64,N} where N)
+function Axis_Aligned_Box{X<:AbstractArray{Float64,N} where N}(Intervals::X)
     Θ = Axis_Aligned_Box(Intervals, size(Intervals,1))
     return Θ
 end
@@ -34,11 +34,11 @@ end
 # [l₁,u₁],…,[l_D, u_D]
 # of the dimesion wise
 # min and max of the data
-function get_intervals(X::Array{Float64,N} where N)
-    intervals = zeros(size(X,2),2)
-    for i in 1:size(X,2)
-        l = minimum(X[:,i])
-        u = maximum(X[:,i])
+function get_intervals{X<:AbstractArray{Float64,N} where N}(Data::X)
+    intervals = zeros(size(Data,2),2)
+    for i in 1:size(Data,2)
+        l = minimum(Data[:,i])
+        u = maximum(Data[:,i])
         intervals[i,:] = [l,u]
     end
     return intervals
