@@ -342,7 +342,7 @@ satisfies completeness if all the data points that are members of a given class
 are elements of the same cluster'.
 """
 function completeness(target::AbstractVector,
-                            output::AbstractVector)
+                      output::AbstractVector)
     return (homogeneity_score(output, target))
 end
 
