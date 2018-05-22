@@ -115,10 +115,10 @@ abstract type Learner end
 
 immutable ModelLearner <: Learner
     name::String
-    parameters::Union{Void,Dict{Any, Any}, ParametersSet}
+    parameters::Union{Void, Dict, ParametersSet}
     modelᵧ::Union{Void, MLRModel}
     ModelLearner(learner::String) = new(learner, nothing)
-    ModelLearner(learner::String, parameters) = new(learner, parameters)
+    ModelLearner(learner::String, parameters) = new(learner, parameters, nothing)
     ModelLearner(learner::Learner, modelᵧ::MLRModel) = new(learner.name, learner.parameters, modelᵧ)
     ModelLearner(learner::Learner, modelᵧ::MLRModel, parameters::ParametersSet) = new(learner.name, parameters, modelᵧ)
 
