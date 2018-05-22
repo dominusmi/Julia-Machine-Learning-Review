@@ -7,32 +7,36 @@ include("Mondrian_Tree.jl")
 
 # I think the mean and variance of of the targets
 # they just call it predictive mean and variance
-function Sample_Mondrian_Tree!(Tree::Mondrian_Tree,
-                               λ::Float64,
-                               X::Array{Float64,N} where N,
-                               Y::Array{Float64, N} where N,
+function Sample_Mondrian_Tree!{X<:AbstractArray{Float64,N} where N,
+                               Y<:AbstractArray{Float64, N} where N}(
+                               Tree::Mondrian_Tree,
+                               λ::AbstractFloat,
+                               Data::X,
+                               Labels::Y,
                                min_samples_split=10)
     # initialise the tree
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
-    Θ = Axis_Aligned_Box(get_intervals(X))
+    Θ = Axis_Aligned_Box(get_intervals(Data))
     e.Θ = Θ
     # regression data
-    e.m = mean(Y)
-    e.v = var(Y)
-    Sample_Mondrian_Block!(e, Θ, λ, Tree, X, Y, min_samples_split)
+    e.m = mean(Labels)
+    e.v = var(Labels)
+    Sample_Mondrian_Block!(e, Θ, λ, Tree, Data, Labels, min_samples_split)
     return Tree
 end
 
-function Sample_Mondrian_Block!(j::Mondrian_Node,
+function Sample_Mondrian_Block!{X<:AbstractArray{Float64,N} where N,
+                                Y<:AbstractArray{Float64, N} where N}(
+                                j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
-                                λ::Float64,
+                                λ::AbstractFloat,
                                 Tree::Mondrian_Tree,
-                                X::Array{Float64,N} where N,
-                                Y::Array{Float64,N} where N,
+                                Data::X,
+                                Labels::Y,
                                 min_samples_split=10)
     # check if minimum samples reached
-    if size(Y,1) < min_samples_split
+    if size(Labels,1) < min_samples_split
         j.τ = λ
     else
         # sample time
@@ -59,16 +63,16 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
         Θᴸ.Intervals[d,2]=x
         Θᴿ.Intervals[d,1]=x
         # check there is actually data here
-        Xᴿ = get_data_indices(Θᴿ,X,d)
-        Xᴸ = get_data_indices(Θᴸ,X,d)
+        Dataᴿ = get_data_indices(Θᴿ,Data,d)
+        Dataᴸ = get_data_indices(Θᴸ,Data,d)
         # strictly binary tree
-        if (size(Xᴿ,1)>0 && size(Xᴸ,1)>0)
+        if (size(Dataᴿ,1)>0 && size(Dataᴸ,1)>0)
             right = Mondrian_Node(0.0, [true,false,false])
             right.parent = j
             # data changes A2 -> lines 8,9,10
             right.Θ = Θᴿ
-            right.m = mean(Y[Xᴿ])
-            right.v = var(Y[Xᴿ])
+            right.m = mean(Labels[Dataᴿ])
+            right.v = var(Labels[Dataᴿ])
             if isnan(right.v)
                 right.v = j.v
             end
@@ -77,16 +81,16 @@ function Sample_Mondrian_Block!(j::Mondrian_Node,
             left = Mondrian_Node(0.0, [true,false,false])
             left.parent = j
             left.Θ = Θᴸ
-            left.m = mean(Y[Xᴸ])
-            left.v = var(Y[Xᴸ])
+            left.m = mean(Labels[Dataᴸ])
+            left.v = var(Labels[Dataᴸ])
             if isnan(left.v)
                 left.v = j.v
             end
             j.left = left
 
             # recurse
-            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, X[Xᴸ,:], Y[Xᴸ],min_samples_split)
-            Sample_Mondrian_Block!(right, get(right.Θ),λ, Tree, X[Xᴿ,:], Y[Xᴿ],min_samples_split)
+            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, Data[Dataᴸ,:], Labels[Dataᴸ],min_samples_split)
+            Sample_Mondrian_Block!(right, get(right.Θ),λ, Tree, Data[Dataᴿ,:], Labels[Dataᴿ],min_samples_split)
         # set j as a leaf for no data/ not binary
         else
             j.τ = λ
@@ -148,10 +152,12 @@ function predict_reg(MT::Mondrian_Tree,x)
     end
 end
 
-function predict_reg_batch(MT::Mondrian_Tree, X::Array{Float64,N} where N)
-    P = zeros(size(X,1))
-    for i in 1:size(X,1)
-        P[i] = predict_reg(MT,X[i])
+function predict_reg_batch{X<:AbstractArray{Float64,N} where N}(
+                           MT::Mondrian_Tree,
+                           Data::X)
+    P = zeros(size(Data,1))
+    for i in 1:size(Data,1)
+        P[i] = predict_reg(MT,Data[i])
     end
     return P
 end
