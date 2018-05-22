@@ -213,7 +213,6 @@ function normalized_MI(target::AbstractVector,
     result
 end
 
-f(x) = factorial(x)
 normalized_mutual_info_score(target, output, mode) =
                normalized_MI(target, output, mode)
 
@@ -241,6 +240,8 @@ function EMI(U::AbstractVector,
     end
     result
 end
+
+f(x) = factorial(x)
 
 """
     adjusted_MI(target, output, mode)
