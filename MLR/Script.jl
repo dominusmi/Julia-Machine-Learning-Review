@@ -97,7 +97,7 @@ task = Task(task_type="regression", targets=[3], data=data)
 lrns = Array{Learner}(0)
 psSet = Array{ParametersSet}(0)
 
-lrn = Learner("glm")
+lrn = ModelLearner("glm")
 ps = ParametersSet([
     ContinuousParameter(
         name = "cost",
@@ -113,7 +113,7 @@ ps = ParametersSet([
 push!(lrns, lrn)
 push!(psSet, ps)
 
-lrn = Learner("multivariate")
+lrn = ModelLearner("multivariate")
 ps = ParametersSet([
     DiscreteParameter(
         name="regType",
@@ -126,16 +126,21 @@ ps = ParametersSet([
         transform = x->10^x
     )
 ])
+
 push!(lrns, lrn)
 push!(psSet, ps)
 
 storage = MLRStorage()
 mp = MLRMultiplex(lrns, psSet)
+
+
 include("Tuning.jl")
 include("multivariate_wrapper.jl")
 include("Visualisation.jl")
 tune(mp, task, storage=storage, measure=mean_squared_error)
 plot_storage(storage, plotting_args=Dict(:scale=>:log10))
+
+
 # modelᵧ = learnᵧ(lrn, task, data)
 # predictᵧ(modelᵧ, data_features=data, task=task)
 
