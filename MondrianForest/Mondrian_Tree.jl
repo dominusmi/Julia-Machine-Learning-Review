@@ -113,7 +113,7 @@ Called by `Sample_Mondrian_Tree` (use that). A recursive functions
 to sample the splits of the mondrian tree.
 """
 
-function Sample_Mondrian_Block!{X<:AbstractArray{Float64,N} where N,
+function Sample_Mondrian_Block!{X<:AbstractArray{<:AbstractFloat, N} where N,
                                 Y<:AbstractArray{Int64, N} where N}(
                                 j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,

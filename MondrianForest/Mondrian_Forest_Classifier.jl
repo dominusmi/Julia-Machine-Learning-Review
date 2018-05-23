@@ -140,12 +140,6 @@ function predict_proba!{X <: AbstractArray{Float64,N} where N}(
     return pred
 end
 
-function expand!(MT::Mondrian_Tree_Classifier, X::Array{Float64,N} where N, Y::Array{Int64}, λ::Float64)
-    expand!(MT.Tree, X, Y, λ)
-    MT.X = vcat(MT.X,X)
-    MT.Y = vcat(MT.Y,Y)
-end
-
 ## Mondrian Forest Training and Prediction
 """
 `function train!(MF::Mondrian_Forest_Classifier,
@@ -209,14 +203,6 @@ function predict_proba!{X<:AbstractArray{Float64,N} where N}(
         end
     end
     return pred/MF.n_trees
-end
-
-function expand!(MF::Mondrian_Forest_Classifier, X::Array{Float64,N} where N, Y::Array{Int64}, λ::Float64)
-    for MTC in MF.Trees
-        expand!(MTC.Tree, X, Y, λ)
-    end
-    MF.X = vcat(MF.X,X)
-    MF.Y = vcat(MF.Y,Y)
 end
 
 ## For testing
