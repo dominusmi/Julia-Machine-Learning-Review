@@ -128,28 +128,34 @@ function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X:
     end
 end
 
-"""
-`function expand!(T::Mondrian_Tree,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)`
 
-This function expands an already sampled Mondrian Tree by a desired number of datapoints. 
-
-`Input`: Mondrian Tree T (abstract type Mondrian_Tree), array of features X (Array of Float64), array of class labels (1dim of Float 64), Lifetime parameter λ (Float 64)
-
-Each row in the array X represents one set of features, the corresponding row in Y represents the class label. 
-
-`Output`: Mondrian Tree with incoporated new datapoints
-
-`Files needed to run this function`: Mondrian_Forest_Classifier.jl", "Mondrian_extention.jl"
-
-This function calls the function Extend_Mondrian_Tree. 
-"""
-
-function expand!(T::Mondrian_Tree,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)    
+function expand!(T::Mondrian_Tree_Classifier,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)    
     
     # puts the extention in a nice framework, allows to extend by multiple datapoints
     
     for i=1:length(X[:,1])
-        T=Extend_Mondrian_Tree!(T,λ,X[i,:],Y[i]);
+        T.Tree=Extend_Mondrian_Tree!(T.Tree,λ,X[i,:],Y[i]);
     end
+    T.X = vcat(T.X,X)
+    T.Y = vcat(T.Y,Y)
+    compute_predictive_posterior_distribution!(T.Tree,10*size(X,2))
     return T    
+end
+
+
+function expand_forest!(MF::Mondrian_Forest_Classifier,X_extend, Y_extend,λ)
+    X=MF.X
+    Y=MF.Y
+    if size(X)[2] != size(X_extend)[2]
+        println("Error - the number of features in the new data doesn't fit the original data")
+    end
+    Trees=MF.Trees
+    for i=1:MF.n_trees
+        T = expand!(Trees[i], X_extend,Y_extend,λ)
+        Trees[i]=T
+    end
+     MF.Trees=Trees
+     MF.X=vcat(X,X_extend)
+     MF.Y=vcat(Y,Y_extend)
+    
 end
