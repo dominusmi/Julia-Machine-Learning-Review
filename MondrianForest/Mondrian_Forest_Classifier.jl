@@ -98,6 +98,7 @@ function train!{X <:AbstractArray{Float64,N} where N,
     compute_predictive_posterior_distribution!(MT.Tree,10*size(Data,2))   # TODO get rid of this override
     MT.X = Data
     MT.Y = Labels
+    return MT
 end
 
 """
@@ -161,6 +162,7 @@ function train!{X<:AbstractArray{Float64, N} where N,
     end
     MF.X = Data
     MF.Y = Labels
+    return MF
 end
 
 """
