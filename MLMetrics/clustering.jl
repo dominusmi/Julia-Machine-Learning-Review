@@ -12,16 +12,6 @@ for Clusterings Comparison: Variants, Properties, Normalization
 and Correction for Chance, JMLR
 """
 # ============================================================
-"""
-    immutable ContingencyTable(U, V)
-ContingencyTable is the implementation of Contingency Table introduced
-on Vinh et al. (2010). 'N' is the number of intances at both target and
-output. 'R' is the number of clusters in target which becomesthe number
-of rows. 'C' is the number of clusters in output whichbecomes the number
-of columns. 'a', which is a vector, is themarginal distribution for target
-and 'b' plays the same role foroutput. 'n', whihch is a 2D matrix, is the
-joint distribution of taget and output.
-"""
 immutable ContingencyTable
     N::Int
     R::Int
@@ -156,7 +146,9 @@ function MI(target::AbstractVector,
     result
 end
 
-mutual_info_score(target, out) = MI(target, output)
+mutual_info_score(target::AbstractVector,
+                  output::AbstractVector) =
+MI(target, output)
 
 """
     normalized_MI(target, output, mode)
@@ -213,8 +205,10 @@ function normalized_MI(target::AbstractVector,
     result
 end
 
-normalized_mutual_info_score(target, output, mode) =
-               normalized_MI(target, output, mode)
+normalized_mutual_info_score(target::AbstractVector,
+                             output::AbstractVector,
+                             mode::String = "sqrt") =
+normalized_MI(target, output, mode)
 
 """
     EMI(target, output)
@@ -289,8 +283,10 @@ function adjusted_MI(target::AbstractVector,
     result
 end
 
-adjusted_mutual_info_score(target, output, mode) =
-               adjusted_MI(target, output, mode)
+adjusted_mutual_info_score(target::AbstractVector,
+                           output::AbstractVector,
+                           mode::String = "max") =
+adjusted_MI(target, output, mode)
 
 """
     adjusted_rand_score(target, output)
@@ -332,7 +328,9 @@ function homogeneity(target::AbstractVector,
     end
 end
 
-homogeneity_score(target, out) = homogeneity(target, output)
+homogeneity_score(target::AbstractVector,
+                  output::AbstractVector) =
+homogeneity(target, output)
 
 """
     completeness(target, output)
@@ -346,7 +344,9 @@ function completeness(target::AbstractVector,
     return (homogeneity_score(output, target))
 end
 
-completeness_score(target, out) = completeness(target, output)
+completeness_score(target::AbstractVector,
+                   output::AbstractVecto =
+completeness(target, output)
 
 """
     v_measure_score(target, output)
