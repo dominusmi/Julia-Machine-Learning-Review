@@ -3,27 +3,23 @@ include("Mondrian_Tree_Regression.jl")
 ## same as classifier by for regression
 mutable struct Mondrian_Tree_Regressor
     Tree::Mondrian_Tree
-    X::AbstractArray{Float64, N} where N
-    Y::AbstractArray{Float64, N} where N
+    X
+    Y
 end
 
 function Mondrian_Tree_Regressor()
     return Mondrian_Tree_Regressor(Mondrian_Tree(),[],[])
 end
 
-function Mondrian_Tree_Regressor{X<:AbstractArray{Float64,N} where N,
-                                 Y<:AbstractArray{Float64,N} where N}(
-                                 Tree::Mondrian_Tree,
-                                 Data::X,
-                                 Labels::Y)
-    return Mondrian_Tree_Regressor(Tree,Data,Labels)
+function Mondrian_Tree_Regressor(Tree::Mondrian_Tree)
+    Mondrian_Tree_Regressor(Tree, [], [])
 end
 
 mutable struct Mondrian_Forest_Regressor
     n_trees::Int64                          # number of trees in the forest
     Trees::Array{Mondrian_Tree_Regressor,1}
-    X::AbstractArray{Float64,N} where N
-    Y::AbstractArray{Float64,N} where N
+    X
+    Y
 end
 
 function Mondrian_Forest_Regressor(n_trees::Int64=10)
@@ -35,8 +31,8 @@ function Mondrian_Forest_Regressor(n_trees::Int64=10)
     return MF
 end
 
-function train!{X<:AbstractArray{Float64,N} where N,
-                Y<:AbstractArray{Float64,N} where N}(
+function train!{X<:Array{<: AbstractFloat} where N,
+                Y<:Array{<: AbstractFloat} where N}(
                 MT::Mondrian_Tree_Regressor,
                 Data::X,
                 Labels::Y,
@@ -52,8 +48,8 @@ function predict!(MT::Mondrian_Tree_Regressor,
     return predict_reg_batch(MT.Tree,X)
 end
 
-function train!{X<:AbstractArray{Float64,N} where N,
-                Y<:AbstractArray{Float64,N} where N}(
+function train!{X<:Array{<: AbstractFloat} where N,
+                Y<:Array{<: AbstractFloat} where N}(
                 MF::Mondrian_Forest_Regressor,
                 Data::X,
                 Labels::Y,
@@ -67,7 +63,7 @@ function train!{X<:AbstractArray{Float64,N} where N,
     MF.Y = Labels
 end
 
-function predict!{X<:AbstractArray{Float64,N} where N,}(
+function predict!{X<:Array{<: AbstractFloat} where N,}(
                   MF::Mondrian_Forest_Regressor,
                   Data::X)
     pred = zeros(MF.n_trees,size(Data,1))

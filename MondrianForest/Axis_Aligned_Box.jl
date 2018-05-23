@@ -4,12 +4,12 @@ using Distributions
 # representing
 # [a₁,b₁]x[a₂,b₂]x⋯x[a_D, b_D]
 mutable struct Axis_Aligned_Box
-    Intervals::AbstractArray{Float64,N} where N
+    Intervals::Array{<: AbstractFloat, N} where N
     D::Int
 end
 
 # constructor with intervals
-function Axis_Aligned_Box{X<:AbstractArray{Float64,N} where N}(Intervals::X)
+function Axis_Aligned_Box{X<:Array{<: AbstractFloat, N} where N}(Intervals::X)
     Θ = Axis_Aligned_Box(Intervals, size(Intervals,1))
     return Θ
 end
@@ -34,7 +34,7 @@ end
 # [l₁,u₁],…,[l_D, u_D]
 # of the dimesion wise
 # min and max of the data
-function get_intervals{X<:AbstractArray{Float64,N} where N}(Data::X)
+function get_intervals{X<:Array{<: AbstractFloat,N} where N}(Data::X)
     intervals = zeros(size(Data,2),2)
     for i in 1:size(Data,2)
         l = minimum(Data[:,i])
