@@ -7,8 +7,8 @@ include("Mondrian_Tree.jl")
 
 # I think the mean and variance of of the targets
 # they just call it predictive mean and variance
-function Sample_Mondrian_Tree!{X<:AbstractArray{Float64,N} where N,
-                               Y<:AbstractArray{Float64, N} where N}(
+function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
+                               Y<:Array{<: AbstractFloat,N} where N}(
                                Tree::Mondrian_Tree,
                                λ::AbstractFloat,
                                Data::X,
@@ -26,8 +26,8 @@ function Sample_Mondrian_Tree!{X<:AbstractArray{Float64,N} where N,
     return Tree
 end
 
-function Sample_Mondrian_Block!{X<:AbstractArray{Float64,N} where N,
-                                Y<:AbstractArray{Float64, N} where N}(
+function Sample_Mondrian_Block!{X<:Array{<: AbstractFloat,N} where N,
+                                Y<:Array{<: AbstractFloat,N} where N}(
                                 j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
                                 λ::AbstractFloat,
@@ -152,7 +152,7 @@ function predict_reg(MT::Mondrian_Tree,x)
     end
 end
 
-function predict_reg_batch{X<:AbstractArray{Float64,N} where N}(
+function predict_reg_batch{X<:Array{<: AbstractFloat,N} where N}(
                            MT::Mondrian_Tree,
                            Data::X)
     P = zeros(size(Data,1))

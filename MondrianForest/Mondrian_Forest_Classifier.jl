@@ -7,8 +7,8 @@ using Base.show
 
 mutable struct Mondrian_Tree_Classifier
     Tree::Mondrian_Tree
-    X::AbstractArray{Float64,N} where N             # training data
-    Y::AbstractArray{Int64}                           # training labels
+    X      # training data
+    Y        # training labels
 end
 
 """
@@ -29,18 +29,12 @@ function Mondrian_Tree_Classifier(Tree::Mondrian_Tree)
     return Mondrian_Tree_Classifier(Tree,[],[])
 end
 
-"""
-`function Mondrian_Tree_Classifier()`
-
-Initialise a mondrian tree classifier with a given tree Tree, data X, and labels Y.
-"""
-function Mondrian_Tree_Classifier{X<:AbstractArray{Float64,N} where N,
-                                  Y<:AbstractArray{Int64, N} where N}(
-                                  Tree::Mondrian_Tree,
-                                  Data::X,
-                                  Labels::Y)
-    return Mondrian_Tree_Classifier(Tree,Data,Labels)
-end
+# function Mondrian_Tree_Classifier{X<:Array{<: AbstractFloat,N} where N,
+#                                   Y<:Array{<: Integer,N} where N}(
+#                                   Tree::Mondrian_Tree)
+#     MT = Mondrian_Tree_Classifier()
+#     return Mondrian_Tree_Classifier(Tree)
+# end
 
 function Base.show(io::IO, MT::Mondrian_Tree_Classifier)
     print("Mondrian Tree Classifier:\n")
@@ -49,11 +43,11 @@ end
 
 ### Mondrian Forest Classifier Definitions
 
-mutable struct Mondrian_Forest_Classifier   # currently trees in the forest just use default params same as in the paper
+mutable struct Mondrian_Forest_Classifier
     n_trees::Int64                          # number of trees in the forest
     Trees::Array{Mondrian_Tree_Classifier,1}
-    X::AbstractArray{Float64,N} where N
-    Y::AbstractArray{Int64}
+    X
+    Y
 end
 
 """
@@ -81,15 +75,15 @@ end
 
 """
 `function train!(MT::Mondrian_Tree_Classifier,
-                X::AbstractArray{Float64,N} where N,
-                Y::AbstractArray{Int64},
+                X<:Array{<: AbstractFloat,N} where N,
+                Y<:Array{Int64},
                 λ=1e9)`
 
 Trains (samples) a mondrian tree on data X with labels Y and a lifetime parameter
 λ (cross-validate this).
 """
-function train!{X <:AbstractArray{Float64,N} where N,
-                Y <:AbstractArray{Int64, 1},}(
+function train!{X <:Array{<: AbstractFloat,N} where N,
+                Y <:Array{<: Integer, N} where N}(
                 MT::Mondrian_Tree_Classifier,
                 Data::X,
                 Labels::Y,
@@ -103,12 +97,12 @@ end
 
 """
 `function predict!(MT::Mondrian_Tree_Classifier,
-                  X::AbstractArray{Float64,N} where N)`
+                  X<:Array{<: AbstractFloat,N} where N)`
 
 Predict the classes for the new data instances X with a trained tree
 classifier.
 """
-function predict!{X <: AbstractArray{Float64,N} where N}(
+function predict!{X <: Array{<: AbstractFloat,N} where N}(
                   MT::Mondrian_Tree_Classifier,      # batch prediction NB supposedly can change tree structure!
                   Data::X)
     pred = []
@@ -126,12 +120,12 @@ end
 
 """
 `function predict_proba!(MT::Mondrian_Tree_Classifier,
-                        X::AbstractArray{Float64,2})`
+                        X<:Array{Float64,2})`
 
 Return the probabilities for predicting each class for the new data instances
 X.
 """
-function predict_proba!{X <: AbstractArray{Float64,N} where N}(
+function predict_proba!{X <: Array{<: AbstractFloat,N} where N}(
                         MT::Mondrian_Tree_Classifier,      # batch prediction NB supposedly can change tree structure!
                         Data::X)
     pred = []
@@ -144,14 +138,14 @@ end
 ## Mondrian Forest Training and Prediction
 """
 `function train!(MF::Mondrian_Forest_Classifier,
-                X::AbstractArray{Float64,2},
-                Y::AbstractArray{Int64},
+                X<:Array{Float64,2},
+                Y<:Array{Int64},
                 λ::AbstractFloat=1e9)`
 
 Trains (samples) a mondrian forest on the data X with labels Y.
 """
-function train!{X<:AbstractArray{Float64, N} where N,
-                Y<:AbstractArray{Int64, N} where N}(
+function train!{X<:Array{Float64, N} where N,
+                Y<:Array{<: Integer,N} where N}(
                 MF::Mondrian_Forest_Classifier,
                 Data::X,
                 Labels::Y,
@@ -167,11 +161,11 @@ end
 
 """
 `function predict!(MF::Mondrian_Forest_Classifier,
-                  X::AbstractArray{Float64,2})`
+                  X<:Array{Float64,2})`
 
 Predicts the classes of the new data instances X.
 """
-function predict!{X<:AbstractArray{Float64,N} where N}(
+function predict!{X<:Array{<: AbstractFloat,N} where N}(
                   MF::Mondrian_Forest_Classifier,
                   Data::X)
     pred = zeros(MF.n_trees,size(Data,1))
@@ -187,11 +181,11 @@ end
 
 """
 `function predict_proba!(MF::Mondrian_Forest_Classifier,
-                        X::AbstractArray{Float64,2})`
+                        X<:Array{Float64,2})`
 
 Returns the probabilities for each class of the new data instances X.
 """
-function predict_proba!{X<:AbstractArray{Float64,N} where N}(
+function predict_proba!{X<:Array{<: AbstractFloat,N} where N}(
                         MF::Mondrian_Forest_Classifier,
                         Data::X)
     pred = []

@@ -11,14 +11,14 @@ mutable struct Mondrian_Node
     left::Nullable{Mondrian_Node}
     right::Nullable{Mondrian_Node}
     τ::Float64                      # split time
-    node_type::AbstractArray{Bool,1}        # node,leaf,root
+    node_type::Array{Bool,1}        # node,leaf,root
     δ::Nullable{Int64}                # split dimension
     ζ::Nullable{AbstractFloat}            # split position
     Θ::Nullable{Axis_Aligned_Box}   # data boxes B
-    tab::AbstractArray{Int64}                 # tables serving dish k Chinese restaurant process (CRP)
-    c::AbstractArray{Int64}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
-    Gₚ::AbstractArray{Float64}              # posterior mean (predictive probability)
-    indices::AbstractArray{Int64}           # stores relevant data points dependent on Θ
+    tab::Array{Int64}                 # tables serving dish k Chinese restaurant process (CRP)
+    c::Array{Int64}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
+    Gₚ::Array{Float64}              # posterior mean (predictive probability)
+    indices::Array{Int64}           # stores relevant data points dependent on Θ
     w::Float64                      # regression weight
     m::Float64                      # regression mean
     v::Float64                      # regression variance
@@ -26,7 +26,7 @@ end
 
 # construction
 
-function Mondrian_Node{T<:AbstractArray{Bool,N} where N}(τ::Float64, node_type::T)
+function Mondrian_Node{T<:Array{Bool,N} where N}(τ::Float64, node_type::T)
     N = Mondrian_Node(Nullable{Mondrian_Node}(),
                       Nullable{Mondrian_Node}(),
                       Nullable{Mondrian_Node}(),
@@ -67,7 +67,7 @@ Base.show(io::IO, MT::Mondrian_Tree) = println(io, "Mondrian Tree with ", length
 
 # for updating the tab and count during the sampling
 # instead of posterior counts
-function get_count{T<:AbstractArray{Int64,N} where N}(j::Mondrian_Node, Y::T, class_num::Int64)
+function get_count{T<:Array{<: Integer, N} where N}(j::Mondrian_Node, Y::T, class_num::Int64)
     j.tab = zeros(class_num)
     j.c = zeros(class_num)
     for i in 1:class_num
@@ -77,14 +77,14 @@ function get_count{T<:AbstractArray{Int64,N} where N}(j::Mondrian_Node, Y::T, cl
 end
 
 """
-`function Sample_Mondrian_Tree!(Tree::Mondrian_Tree, λ::AbstractFloat, X::AbstractArray{Float64,N} where N, Y::AbstractArray{Int64})`
+`function Sample_Mondrian_Tree!(Tree::Mondrian_Tree, λ::AbstractFloat, X<:Array{<: AbstractFloat,N} where N, Y<:Array{Int64})`
 
 The function *samples* an empty mondrian tree object on the data X with labels Y with
 a time limit λ on the underlying mondrian process.
 """
 
-function Sample_Mondrian_Tree!{X<:AbstractArray{Float64,N} where N,
-                               Y<:AbstractArray{Int64, N} where N}(
+function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
+                               Y<:Array{<: Integer, N} where N}(
                                Tree::Mondrian_Tree,
                                λ::AbstractFloat,
                                Data::X,
@@ -106,15 +106,15 @@ end
                                 Θ::Axis_Aligned_Box,
                                 λ::AbstractFloat,
                                 Tree::Mondrian_Tree,
-                                X::AbstractArray{Float64,N} where N,
-                                Y::AbstractArray{Int64})`
+                                X<:Array{<: AbstractFloat,N} where N,
+                                Y<:Array{Int64})`
 
 Called by `Sample_Mondrian_Tree` (use that). A recursive functions
 to sample the splits of the mondrian tree.
 """
 
-function Sample_Mondrian_Block!{X<:AbstractArray{<:AbstractFloat, N} where N,
-                                Y<:AbstractArray{Int64, N} where N}(
+function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
+                                Y<:Array{<: Integer, N} where N}(
                                 j::Mondrian_Node,
                                 Θ::Axis_Aligned_Box,
                                 λ::AbstractFloat,
@@ -196,14 +196,14 @@ function Sample_Mondrian_Block!{X<:AbstractArray{<:AbstractFloat, N} where N,
 end
 
 """
-`function get_data_indices(Θ::Axis_Aligned_Box, X::AbstractArray{Float64,N} where N, dim::Int64)`
+`function get_data_indices(Θ::Axis_Aligned_Box, X<:Array{<: AbstractFloat,N} where N, dim::Int64)`
 
 Determines the data points within a given box, used for
 stopping `Sample_Mondrian_Block` when no data points are present.
 Only checks one dimension dim.
 """
 # only check indices against the changed dimension CF lines 93-97
-function get_data_indices{X<:AbstractArray{Float64,N} where N,}(
+function get_data_indices{X<:Array{<: AbstractFloat,N} where N,}(
                           Θ::Axis_Aligned_Box,
                           Data::X,
                           dim::Int64)
@@ -221,13 +221,13 @@ function get_data_indices{X<:AbstractArray{Float64,N} where N,}(
 end
 
 """
-`function get_data_indices(Θ::Axis_Aligned_Box, X::AbstractArray{Float64,N} where N, dim::Int64)`
+`function get_data_indices(Θ::Axis_Aligned_Box, X<:Array{<: AbstractFloat,N} where N, dim::Int64)`
 
 Determines the data points within a given box, used for
 stopping `Sample_Mondrian_Block` when no data points are present.
 """
 # returns any data from D contained in the boxes of Θ
-function get_data_indices{X<:AbstractArray{Float64,N} where N}(
+function get_data_indices{X<:Array{<: AbstractFloat,N} where N}(
                           Θ::Axis_Aligned_Box,
                           Data::X)
     indices = []
@@ -285,11 +285,11 @@ end
 # predict te class probs
 """
 `function predict!(Tree::Mondrian_Tree,
-                  x::AbstractArray{Float64},
+                  X<:Array{Float64},
                   γ::Real)`
 Predicts the class of new data instance x, not batch.
 """
-function predict!{X<:AbstractArray{Float64,1}}(Tree::Mondrian_Tree,
+function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
                   Datum::X,
                   γ::Real)
     # the algorithm requires computing an expectation
