@@ -167,9 +167,10 @@ Predicts the classes of the new data instances X.
 function predict!{X<:Array{<: AbstractFloat,N} where N}(
                   MF::Mondrian_Forest_Classifier,
                   Data::X)
-    pred=zeros(length(MF.Trees),size(Data,1))
-    for item in enumerate(MF.Trees)
-        pred[item[1],:] = predict!(item[2], Data)
+    pred=zeros(MF.n_trees,size(Data,1))
+    println("")
+    for i in 1:MF.n_trees
+        pred[i,:] = predict!(MF.Trees[i], Data)
     end
     p = zeros(size(Data,1))
     for i in 1:size(Data,1)
