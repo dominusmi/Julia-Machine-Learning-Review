@@ -49,22 +49,7 @@ This function calls the functions
 
 ## Algorithm 4 in the Paper 
 function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X::Array{Float64},Y::Int64)
-if sum(j.c .> 0) == 1  #check if all labels are identical
-     Θ = update_intervals(get(j.Θ),X)        # update extent
-     j.Θ=Θ 
-         if find(j.c .> 0)+1 == Y
-             i = find(j.c .> 0)
-             j.c[i] = j.c[i]+1
-             return
-         else
-            j.node_type = [true,false,false]
-            A=zeros(1,length(X))
-            A[:,:]=X
-            Sample_Mondrian_Block!(j,get(j.Θ),λ,T,A,[Y])
-         end        
-        
-else
-       
+    
     E = rand(Exponential(1/Extended_dimension(get(j.Θ),X)))  #sample value E
     if j.node_type[3]==true                                  # check if the node we're looking at is the root (if yes the split time is assumed to be 0)
         τₚ = 0
@@ -79,9 +64,9 @@ else
 	    j_wave.δ = d
         j_wave.ζ = x
         j_wave.Θ = Θ
-        j_wave.tab = zeros(size(j.tab))
-        j_wave.c = zeros(size(j.c))
-        j_wave.Gₚ = zeros(size(j.Gₚ))
+        j_wave.tab = zeros(size(get(j.tab)))
+        j_wave.c = zeros(size(get(j.c)))
+        j_wave.Gₚ = zeros(size(get(j.Gₚ)))
         else
             j_wave=Mondrian_Node(get(j.parent).τ+E,[true,false,false])  #if we don't replace the root, introcue a new node j_wave, parent to j
 	    j_wave.parent = j.parent
@@ -142,7 +127,6 @@ else
         end
     end
 end
-end
 
 """
 `function expand!(T::Mondrian_Tree_Classifier,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)`
@@ -194,7 +178,7 @@ function expand_forest!(MF::Mondrian_Forest_Classifier,X_extend, Y_extend,λ)
         println("Error - the number of features in the new data doesn't fit the original data")
     end
     Trees=MF.Trees
-    @parallel for i=1:MF.n_trees
+    for i=1:MF.n_trees
         T = expand!(Trees[i], X_extend,Y_extend,λ)
         Trees[i]=T
     end
