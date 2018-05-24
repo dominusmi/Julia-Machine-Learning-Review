@@ -18,6 +18,9 @@ without losing any of the features.
 - [ ] Find a way to make it clear what arguments a model expects
 - [ ] Allow any sampling methods from `MLBase.jl`
 - [ ] Add compatibility with multiple targets
+- [ ] Implement and use categorical cross entropy
+    - [ ] Give warning when assumptions broken
+
 
 
 **Known Issues:**
