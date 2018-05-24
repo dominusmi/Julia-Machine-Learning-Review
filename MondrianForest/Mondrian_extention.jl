@@ -128,6 +128,21 @@ function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X:
     end
 end
 
+"""
+`function expand!(T::Mondrian_Tree_Classifier,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)`
+
+This function expands an already sampled Mondrian Tree Classifier by a desired number of datapoints. 
+
+`Input`: Mondrian Tree Classifier T (abstract type Mondrian_Tree_Classifier), array of features X (Array of Float64), array of class labels (1dim of Float 64), Lifetime parameter λ (Float 64)
+
+Each row in the array X represents one set of features, the corresponding row in Y represents the class label. 
+
+`Output`: Mondrian Tree Classifier with incoporated new datapoints
+
+`Files needed to run this function`: Mondrian_Forest_Classifier.jl", "Mondrian_extention.jl"
+
+This function calls the function Extend_Mondrian_Tree. 
+"""
 
 function expand!(T::Mondrian_Tree_Classifier,X::Array{Float64,N} where N,Y::Array{Int64},λ::Float64)    
     
@@ -142,6 +157,19 @@ function expand!(T::Mondrian_Tree_Classifier,X::Array{Float64,N} where N,Y::Arra
     return T    
 end
 
+"""
+`function expand_forest!(MF::Mondrian_Forest_Classifier,X_extend, Y_extend,λ)`
+
+This function expands an already sampled Mondrian Forest Classifier by a desired number of datapoints.
+
+`Input`: Mondrian Forest Classifier MF (abstract type Mondrian_Forest_Classifier), array of features X_extend to extend the forest on, Array of class labels Y_extend corresponding to the new features, life time parameter λ
+
+`Output`: Mondrian Forest Classifier with incoporated new datapoints
+
+`Files needed to run this function`: Mondrian_Forest_Classifier.jl", "Mondrian_extention.jl"
+
+This function calls the function expand!. 
+"""
 
 function expand_forest!(MF::Mondrian_Forest_Classifier,X_extend, Y_extend,λ)
     X=MF.X
