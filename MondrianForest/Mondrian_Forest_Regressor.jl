@@ -70,13 +70,9 @@ function predict!{X<:Array{<: AbstractFloat} where N,}(
     # if this print is not here
     # the regressor predicts
     # all zeros !!!
-    print("")
+    #print("")
     for item in enumerate(MF.Trees)
-        pred[item[1],:] = predict!(item[2], Data)
+        pred[item[1],:] = predict_reg_batch(item[2].Tree, Data)
     end
-    p = []
-    for i in 1:size(Data,1)
-        push!(p, mean(pred[:,i]))
-    end
-    return p
+    return reshape(mean(pred,1),size(Data,1))
 end

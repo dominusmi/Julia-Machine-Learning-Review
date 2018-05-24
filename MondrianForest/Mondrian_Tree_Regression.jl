@@ -1,4 +1,3 @@
-
 include("Mondrian_Tree.jl")
 
 # The regression requires each node have a
