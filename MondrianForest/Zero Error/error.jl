@@ -17,6 +17,10 @@ y =  predict!(MF,X);
 # zeros..
 println("All zero without the print: ", y)
 
+# y = @enter predict!(MF,X);
+# # zeros..
+# println("All zero without the print: ", y)
+
 # all good now with the added print("") (not all zero prediction)
 function predict_with_print!{X<:Array{<: AbstractFloat} where N,}(
                   MF::Mondrian_Forest_Regressor,
