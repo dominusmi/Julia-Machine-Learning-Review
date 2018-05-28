@@ -107,11 +107,7 @@ function predict!{X <: Array{<: AbstractFloat,N} where N}(
     pred = []
     for i in 1:size(Data,1)
         p = predict!(MT.Tree, Data[i,:], 10*size(Data,2))
-        if p[1] > p[2]
-            push!(pred,1)
-        else
-            push!(pred,2)
-        end
+        push!(pred,findmax(p)[2])
     end
     return pred
 end
@@ -168,7 +164,11 @@ function predict!{X<:Array{<: AbstractFloat,N} where N}(
                   MF::Mondrian_Forest_Classifier,
                   Data::X)
     pred=zeros(MF.n_trees,size(Data,1))
+<<<<<<< HEAD
     print("")
+=======
+    println("")
+>>>>>>> a44cfc3167de68bb13f88be679aad63e92ebe3d0
     for i in 1:MF.n_trees
         pred[i,:] = predict!(MF.Trees[i], Data)
     end
