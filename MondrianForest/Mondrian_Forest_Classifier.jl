@@ -164,11 +164,7 @@ function predict!{X<:Array{<: AbstractFloat,N} where N}(
                   MF::Mondrian_Forest_Classifier,
                   Data::X)
     pred=zeros(MF.n_trees,size(Data,1))
-<<<<<<< HEAD
-    print("")
-=======
     println("")
->>>>>>> a44cfc3167de68bb13f88be679aad63e92ebe3d0
     for i in 1:MF.n_trees
         pred[i,:] = predict!(MF.Trees[i], Data)
     end
