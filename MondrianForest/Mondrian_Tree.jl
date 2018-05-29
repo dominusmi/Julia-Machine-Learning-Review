@@ -18,7 +18,7 @@ mutable struct Mondrian_Node
     tab::Array{Int64}                 # tables serving dish k Chinese restaurant process (CRP)
     c::Array{Int64}                   # customers eating dish k, tab[k] = min(c[k],1) IKN approx
     Gₚ::Array{Float64}              # posterior mean (predictive probability)
-    indices::Array{Int64}           # stores relevant data points dependent on Θ
+    indices::Array{Any}           # stores relevant data points dependent on Θ
     w::Float64                      # regression weight
     m::Float64                      # regression mean
     v::Float64                      # regression variance
@@ -97,6 +97,7 @@ function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
     e.Θ = Θ
     get_count(e,Labels,length(classes))
     e.Gₚ = zeros(length(classes))
+    e.indices = collect(1:size(Data,1))
     Sample_Mondrian_Block!(e, Θ, λ, Tree, Data, Labels)
     return Tree
 end
@@ -123,7 +124,7 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
                                 Labels::Y)
     # paused mondrian check
     # should be one for pure targets
-    if sum(j.c .> 0) == 1
+    if sum(j.c .> 0) == 1 || size(j.indices,1) == 0
         j.τ = λ
     else
         # not paused, sample the time
@@ -143,42 +144,41 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
         # update node j's data
         j.δ = d
         j.ζ = x
-        Θᴸ = copy(Θ)
-        # look at this copy
-        Θᴿ = copy(Θ)
+        # Θᴸ = copy(Θ)
+        # # look at this copy
+        # Θᴿ = copy(Θ)
         # Left and Right children have constricted boxes
-        Θᴸ.Intervals[d,2]=x
-        Θᴿ.Intervals[d,1]=x
+        # Θᴸ.Intervals[d,2]=x
+        # Θᴿ.Intervals[d,1]=x
         # check there is actually data here
-        Dataᴿ = get_data_indices(Θᴿ,Data,d)
-        Dataᴸ = get_data_indices(Θᴸ,Data,d)
-        # strictly binary tree
-        if (size(Dataᴿ,1)>0 && size(Dataᴸ,1)>0)
-            right = Mondrian_Node(0.0, [true,false,false])
-            right.parent = j
-            # data changes A2 -> lines 8,9,10
-            right.Θ = Θᴿ
-            get_count(right, Labels[Dataᴿ], length(j.c))
-            right.Gₚ=zeros(size(j.c,1))
-            j.right = right
+        # Dataᴿ = get_data_indices(Θᴿ,Data,d)
+        # Dataᴸ = get_data_indices(Θᴸ,Data,d)
+        Dataᴿ = find(Data[:,d] .> x)
+        Dataᴸ = find(Data[:,d] .<= x)
 
-            left = Mondrian_Node(0.0, [true,false,false])
-            left.parent = j
-            left.Θ = Θᴸ
-            get_count(left, Labels[Dataᴸ], length(j.c))
-            left.Gₚ = zeros(size(j.c,1))
-            j.left = left
+        Θᴿ = Axis_Aligned_Box(get_intervals(Data[Dataᴿ,:]))
+        Θᴸ = Axis_Aligned_Box(get_intervals(Data[Dataᴸ,:]))
 
-            # recurse
-            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, Data[Dataᴸ,:], Labels[Dataᴸ])
-            Sample_Mondrian_Block!(right, get(right.Θ),λ, Tree, Data[Dataᴿ,:], Labels[Dataᴿ])
-        # set j as a leaf for no data/ not binary
-        else
-            j.τ = λ
-            j.node_type = [false,true,false]
-            push!(Tree.leaves,j)
-            return
-        end
+        right = Mondrian_Node(0.0, [true,false,false])
+        right.parent = j
+        right.indices = Dataᴿ
+        # data changes A2 -> lines 8,9,10
+        right.Θ = Θᴿ
+        get_count(right, Labels[Dataᴿ], length(j.c))
+        right.Gₚ=zeros(size(j.c,1))
+        j.right = right
+
+        left = Mondrian_Node(0.0, [true,false,false])
+        left.parent = j
+        left.indices = Dataᴸ
+        left.Θ = Θᴸ
+        get_count(left, Labels[Dataᴸ], length(j.c))
+        left.Gₚ = zeros(size(j.c,1))
+        j.left = left
+
+        # recurse
+        Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, Data[Dataᴸ,:], Labels[Dataᴸ])
+        Sample_Mondrian_Block!(right, get(right.Θ), λ, Tree, Data[Dataᴿ,:], Labels[Dataᴿ])
     # set j as leaf for time out
     else
         j.τ = λ
@@ -194,6 +194,7 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
         return
     end
 end
+
 
 """
 `function get_data_indices(Θ::Axis_Aligned_Box, X<:Array{<: AbstractFloat,N} where N, dim::Int64)`
@@ -314,31 +315,51 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
         for d in size(Datum,1)
             nⱼ += max(Datum[d]-get(j.Θ).Intervals[d,2],0) + max(get(j.Θ).Intervals[d,1]-Datum[d],0)
         end
-        pⱼ = 1-exp(Δⱼ*nⱼ)
+        pⱼ = 1-exp(-Δⱼ*nⱼ)
         # yes this part does add nodes to the tree!
-        # although i've never seen it called...
-        if pⱼ > 0
+        if pⱼ > 0 && j.node_type != [false,false,true]
+            println(pⱼ)
             # x branches
-            jₓ = Mondrian_Node()
+            jₓ = Mondrian_Node(j.τ,[true,false,false])
             if (j == get(j.parent).left)
                 get(j.parent).left = jₓ
+                jₓ.left = j
+                jₓ.right = Mondrian_Node(j.τ,[false,true,false])
+                j_wave = get(jₓ.right)
             else
                 get(j.parent).right = jₓ
+                jₓ.right = j
+                jₓ.left = Mondrian_Node(j.τ,[false,true,false])
+                j_wave = get(jₓ.left)
             end
+            # setting up the branched node
             jₓ.parent = get(j.parent)
             j.parent = jₓ
-            jₓ.left = j
-            jₓ.right = Mondrian_Node()
+            j_wave.parent = jₓ
+            push!(Tree.leaves, j_wave)
+
+            jₓ.Θ = get(jₓ.parent).Θ
+            jₓ.δ = get(jₓ.parent).δ
+            jₓ.ζ = get(jₓ.parent).ζ
+            # child set up
+            get(j_wave.parent).c = zeros(length(j.c))
+            j_wave.Θ = Axis_Aligned_Box(get_intervals(Datum))
+            # get(jₓ.left).δ = jₓ.δ
+            # get(jₓ.left).ζ = jₓ.ζ
+            # c and Gₚ handled below setting to 0s for now
+            jₓ.c = zeros(length(j.c))
+            jₓ.Gₚ = zeros(length(j.c))
             d = expected_discount(nⱼ, Δⱼ, γ)
             for k in 1:length(j.c)
                 jₓ.c[k] = min(j.c[k],1)
             end
             jₓ.tab = jₓ.c
             for k in 1:length(jₓ.c)
-                jₓ.Gₚ[k] = 1/(sum(jₓ.c))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
+                jₓ.Gₚ[k] = (1/(sum(jₓ.c)))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
             end
+            j_wave.Gₚ = jₓ.Gₚ
             for k in 1:length(s)
-                s[k] += not_sep*(1-pⱼ)*jₓ.Gₚ[k]
+                s[k] += not_sep*(pⱼ)*jₓ.Gₚ[k]
             end
         end
         if j.node_type[2] == true
