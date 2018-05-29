@@ -43,7 +43,7 @@ function Mondrian_Node{T<:Array{Bool,N} where N}(τ::Float64, node_type::T)
                       0.0,
                       0.0,
                       0.0,
-                      [])
+                      [[],[])
     return N
 end
 
