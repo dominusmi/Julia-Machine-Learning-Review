@@ -22,6 +22,7 @@ mutable struct Mondrian_Node
     w::Float64                      # regression weight
     m::Float64                      # regression mean
     v::Float64                      # regression variance
+    Paused_Data::Array{Any}
 end
 
 # construction
@@ -41,7 +42,8 @@ function Mondrian_Node{T<:Array{Bool,N} where N}(τ::Float64, node_type::T)
                       [],
                       0.0,
                       0.0,
-                      0.0)
+                      0.0,
+                      [])
     return N
 end
 
@@ -125,6 +127,8 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
     # should be one for pure targets
     if sum(j.c .> 0) == 1
         j.τ = λ
+        j.Paused_Data[1] = Data
+        j.Paused_Data[2] = Labels
     else
         # not paused, sample the time
         E = rand(Exponential(1/Linear_dimension(Θ)))
