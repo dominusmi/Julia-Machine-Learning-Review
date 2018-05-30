@@ -124,11 +124,12 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
                                 Labels::Y)
     # paused mondrian check
     # should be one for pure targets
-    if sum(j.c .> 0) == 1 || size(j.indices,1) == 0
+    if sum(j.c .> 0) == 1 || size(j.indices,1) == 1
         j.τ = λ
     else
         # not paused, sample the time
         E = rand(Exponential(1/Linear_dimension(Θ)))
+        #println(E, 1/Linear_dimension(Θ))
         if j.node_type[3]==true
             τₚ = 0
         else
@@ -318,9 +319,8 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
         pⱼ = 1-exp(-Δⱼ*nⱼ)
         # yes this part does add nodes to the tree!
         if pⱼ > 0 && j.node_type != [false,false,true]
-            println(pⱼ)
             # x branches
-            jₓ = Mondrian_Node(j.τ,[true,false,false])
+            jₓ = Mondrian_Node(0.0,[true,false,false])
             if (j == get(j.parent).left)
                 get(j.parent).left = jₓ
                 jₓ.left = j
@@ -338,24 +338,26 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
             j_wave.parent = jₓ
             push!(Tree.leaves, j_wave)
 
-            jₓ.Θ = get(jₓ.parent).Θ
-            jₓ.δ = get(jₓ.parent).δ
-            jₓ.ζ = get(jₓ.parent).ζ
+            jₓ.Θ = get(j.parent).Θ
+            jₓ.δ = get(j.parent).δ
+            jₓ.ζ = get(j.parent).ζ
             # child set up
-            get(j_wave.parent).c = zeros(length(j.c))
+            j_wave.c = zeros(length(j.c))
             j_wave.Θ = Axis_Aligned_Box(get_intervals(Datum))
-            # get(jₓ.left).δ = jₓ.δ
-            # get(jₓ.left).ζ = jₓ.ζ
-            # c and Gₚ handled below setting to 0s for now
+            j_wave.δ = get(j.parent).δ
+            j_wave.ζ = get(j.parent).ζ
+
+            d = expected_discount(nⱼ, Δⱼ, γ)
+
+            jₓ.tab = zeros(length(j.c))
             jₓ.c = zeros(length(j.c))
             jₓ.Gₚ = zeros(length(j.c))
-            d = expected_discount(nⱼ, Δⱼ, γ)
             for k in 1:length(j.c)
                 jₓ.c[k] = min(j.c[k],1)
             end
             jₓ.tab = jₓ.c
-            for k in 1:length(jₓ.c)
-                jₓ.Gₚ[k] = (1/(sum(jₓ.c)))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
+            for k in 1:length(j.c)
+                jₓ.Gₚ[k] = (1/(sum(jₓ.c)))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*jₓ.Gₚ[k])
             end
             j_wave.Gₚ = jₓ.Gₚ
             for k in 1:length(s)
@@ -369,10 +371,15 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
             return s
         else
             not_sep = not_sep*(1-pⱼ)
-            if Datum[get(j.δ)] <= get(j.ζ)
-                j = get(j.left)
-            else
-                j = get(j.right)
+            try
+                if Datum[get(j.δ)] <= get(j.ζ)
+                    j = get(j.left)
+                else
+                    j = get(j.right)
+                end
+                #throw(new Exception(""))
+            catch e
+                #println(j.τ)
             end
         end
     end

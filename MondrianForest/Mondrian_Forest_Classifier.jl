@@ -45,6 +45,7 @@ end
 mutable struct Mondrian_Forest_Classifier
     n_trees::Int64                          # number of trees in the forest
     Trees::Array{Mondrian_Tree_Classifier,1}
+    Features::Array{Array{Int64,1}}
     X
     Y
 end
@@ -57,6 +58,7 @@ Initialise an empty mondrian forest classifier with default 10 trees
 function Mondrian_Forest_Classifier(n_trees::Int64=10)
     MF = Mondrian_Forest_Classifier(n_trees,
                                     Array{Mondrian_Tree_Classifier,1}(),
+                                    Array{Array{Int64,1}}([]),
                                     [],
                                     [])
     MF.Trees = Array{Mondrian_Tree_Classifier,1}()
@@ -144,10 +146,13 @@ function train!{X<:Array{Float64, N} where N,
                 MF::Mondrian_Forest_Classifier,
                 Data::X,
                 Labels::Y,
-                λ::Float64=1e9)
+                λ::Float64=1e9,
+                random_features=ceil(size(Data,2)))
     @parallel for i in 1:MF.n_trees
+        features = randperm(size(Data,2))[1:random_features]
         push!(MF.Trees,Mondrian_Tree_Classifier())
-        train!(MF.Trees[end], Data, Labels, λ)
+        push!(MF.Features,features)
+        train!(MF.Trees[end], Data[:,features], Labels, λ)
     end
     MF.X = Data
     MF.Y = Labels
@@ -166,7 +171,7 @@ function predict!{X<:Array{<: AbstractFloat,N} where N}(
     pred=zeros(MF.n_trees,size(Data,1))
     println("")
     for i in 1:MF.n_trees
-        pred[i,:] = predict!(MF.Trees[i], Data)
+        pred[i,:] = predict!(MF.Trees[i], Data[:,MF.Features[i]])
     end
     p = zeros(size(Data,1))
     for i in 1:size(Data,1)
@@ -188,7 +193,7 @@ function predict_proba!{X<:Array{<: AbstractFloat,N} where N}(
         push!(pred,[0.0,0.0])
     end
     for trees in enumerate(MF.Trees)
-        p=predict_proba!(trees[2], Data)
+        p=predict_proba!(trees[2], Data[:,MF.Features[i]])
         for item in enumerate(p)
             pred[item[1]] += item[2]
         end
