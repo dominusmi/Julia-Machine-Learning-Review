@@ -321,7 +321,6 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
         pⱼ = 1-exp(-Δⱼ*nⱼ)
         # yes this part does add nodes to the tree!
         if pⱼ > 0 && j.node_type != [false,false,true]
-            println(pⱼ)
             # x branches
             jₓ = Mondrian_Node(j.τ,[true,false,false])
             if (j == get(j.parent).left)
