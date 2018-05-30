@@ -322,49 +322,22 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
         pⱼ = 1-exp(-Δⱼ*nⱼ)
         # yes this part does add nodes to the tree!
         if pⱼ > 0 && j.node_type != [false,false,true]
-            println(pⱼ)
-            # x branches
-            jₓ = Mondrian_Node(j.τ,[true,false,false])
-            if (j == get(j.parent).left)
-                get(j.parent).left = jₓ
-                jₓ.left = j
-                jₓ.right = Mondrian_Node(j.τ,[false,true,false])
-                j_wave = get(jₓ.right)
-            else
-                get(j.parent).right = jₓ
-                jₓ.right = j
-                jₓ.left = Mondrian_Node(j.τ,[false,true,false])
-                j_wave = get(jₓ.left)
-            end
-            # setting up the branched node
-            jₓ.parent = get(j.parent)
-            j.parent = jₓ
-            j_wave.parent = jₓ
-            push!(Tree.leaves, j_wave)
-
-            jₓ.Θ = get(jₓ.parent).Θ
-            jₓ.δ = get(jₓ.parent).δ
-            jₓ.ζ = get(jₓ.parent).ζ
-            # child set up
-            get(j_wave.parent).c = zeros(length(j.c))
-            j_wave.Θ = Axis_Aligned_Box(get_intervals(Datum))
-            # get(jₓ.left).δ = jₓ.δ
-            # get(jₓ.left).ζ = jₓ.ζ
-            # c and Gₚ handled below setting to 0s for now
-            jₓ.c = zeros(length(j.c))
-            jₓ.Gₚ = zeros(length(j.c))
             d = expected_discount(nⱼ, Δⱼ, γ)
+            tab = zeros(length(j.c))
+            c = zeros(length(j.c))
+            Gₚ = zeros(length(j.c))
             for k in 1:length(j.c)
-                jₓ.c[k] = min(j.c[k],1)
+                c[k] = min(j.c[k],1)
             end
-            jₓ.tab = jₓ.c
-            for k in 1:length(jₓ.c)
-                jₓ.Gₚ[k] = (1/(sum(jₓ.c)))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*get(jₓ.parent).Gₚ[k])
+            tab = c
+            for k in 1:length(j.c)
+                Gₚ[k] = (1/(sum(c)))*(c[k] - d*tab[k]+d*sum(tab)*Gₚ[k])
             end
-            j_wave.Gₚ = jₓ.Gₚ
+            #j_wave.Gₚ = jₓ.G
             for k in 1:length(s)
-                s[k] += not_sep*(pⱼ)*jₓ.Gₚ[k]
+                s[k] += not_sep*(pⱼ)*Gₚ[k]
             end
+            return s
         end
         if j.node_type[2] == true
             for k in 1:length(s)
