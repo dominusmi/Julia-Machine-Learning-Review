@@ -46,6 +46,14 @@ function get_intervals{X<:Array{<: AbstractFloat,N} where N}(Data::X)
     return intervals
 end
 
+function get_intervals{X<:Array{<: AbstractFloat,1}}(Data::X)
+    intervals = zeros(size(Data))
+    for i in 1:size(Data,1)
+        intervals[i,:] = Data[i]
+    end
+    return intervals
+end
+
 # samples a dimension d and
 # location of split in d from
 # a set of upper-lower intervals
