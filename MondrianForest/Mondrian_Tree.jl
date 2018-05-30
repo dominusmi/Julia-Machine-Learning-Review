@@ -126,13 +126,14 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
                                 Labels::Y)
     # paused mondrian check
     # should be one for pure targets
-    if sum(j.c .> 0) == 1 || size(j.indices,1) == 0
+    if sum(j.c .> 0) == 1 || size(j.indices,1) == 1
         j.τ = λ
         j.Paused_Data[1] = Data
         j.Paused_Data[2] = Labels
     else
         # not paused, sample the time
         E = rand(Exponential(1/Linear_dimension(Θ)))
+        #println(E, 1/Linear_dimension(Θ))
         if j.node_type[3]==true
             τₚ = 0
         else
