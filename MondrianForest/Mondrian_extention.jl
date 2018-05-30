@@ -18,7 +18,7 @@ The usage of the function "expand!" is recommended to expand Mondrian Trees as i
 ## Algorithm 3 in the Paper "Mondrian Forests: Efficient Online Random Forests"
 function Extend_Mondrian_Tree!(T::Mondrian_Tree,λ::Float64,X::Array{Float64},Y::Int64) 
     ϵ=get(T.root)
-    Extend_Mondrian_Block!(T,λ,ϵ,X,Y)  
+    Extend_Mondrian_Block!(T,λ,ϵ,X,Y)
     return T
 end
 
@@ -49,95 +49,57 @@ This function calls the functions
 
 ## Algorithm 4 in the Paper 
 function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X::Array{Float64},Y::Int64)
+    
 if sum(j.c .> 0) == 1  #check if all labels are identical
      Θ = update_intervals(get(j.Θ),X)        # update extent
      j.Θ=Θ 
-         if find(j.c .> 0)+1 == Y
-             i = find(j.c .> 0)
+         if findmax(j.c)[2] == Y
+             i = findmax(j.c)[2]
              j.c[i] = j.c[i]+1
+             backpropergate_c_tab(j,Y)
              return
          else
             j.node_type = [true,false,false]
-            A=zeros(1,length(X))
-            A[:,:]=X
-            Sample_Mondrian_Block!(j,get(j.Θ),λ,T,A,[Y])
+            p_data,p_labels = paused_train_data(j,X,Y)
+            Sample_Mondrian_Block!(j,get(j.Θ),λ,T,p_data,p_labels)
          end        
         
 else
-       
+       #println("not a leaf")
     E = rand(Exponential(1/Extended_dimension(get(j.Θ),X)))  #sample value E
-    if j.node_type[3]==true                                  # check if the node we're looking at is the root (if yes the split time is assumed to be 0)
+    if j.node_type[3]==true
+        # check if the node we're looking at is the root (if yes the split time is assumed to be 0)
+            #println("j is the root")
         τₚ = 0
     else
+            #println("j is not the root")
         τₚ = (get(j.parent)).τ                               # if it's not the root get the split time of the node above j
     end
     if τₚ + E < j.τ                                          # check if our split happens in time
+                                                           
         d,x= sample_extended_split_dimension(get(j.Θ),X)     # sample new split dimension / split direction
         Θ = update_intervals(get(j.Θ),X)                     # get the boxes for the new node
-        if j.node_type[3]==true                              # check if we replace the root
-            j_wave=Mondrian_Node(E,[true,false,false])       # replace the root by the new node j_wave
-	    j_wave.δ = d
-        j_wave.ζ = x
-        j_wave.Θ = Θ
-        j_wave.tab = zeros(size(j.tab))
-        j_wave.c = zeros(size(j.c))
-        j_wave.Gₚ = zeros(size(j.Gₚ))
-        else
-            j_wave=Mondrian_Node(get(j.parent).τ+E,[true,false,false])  #if we don't replace the root, introcue a new node j_wave, parent to j
-	    j_wave.parent = j.parent
-	    j_wave.δ = d
-        j_wave.ζ = x
-        j_wave.Θ = Θ
-        j_wave.tab = get(j.parent).tab
-        j_wave.c = get(j.parent).c
-        j_wave.Gₚ = get(j.parent).Gₚ
-            if j == get(j.parent).left             # check if j was left or right child of j_parent
-                get(j.parent).left = j_wave
-            else
-                get(j.parent).right = j_wave
-            end
-        end
-
+        j_wave = init_j_wave(j,E,d,x,Θ) 
+        update_counts_extended(j_wave,j,Y)
         j.parent=j_wave
-        j_prime = Mondrian_Node(0.0, [true,false,false])   #initialise new sibling to j
-        j_prime.parent = j_wave
-        j_prime.tab = zeros(size(j_wave.tab))
-        j_prime.c = zeros(size(j_wave.tab))
-        j_prime.Gₚ=zeros(size(j_wave.c,1))
-        
-        if X[d] > x     # check where the new datapoint lies
-            j_wave.left = j
-            j_wave.right = j_prime 
-                if get(j.Θ).Intervals[d,2]> x    
-                    get(j.Θ).Intervals[d,2] = x  #adapt box of j according to new split
-                end
-            j_prime.Θ = j_wave.Θ
-            get(j_wave.Θ).Intervals[d,1] = x
-            A=zeros(1,length(X))
-            A[:,:]=X
-            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,A,[Y])  #sample a mondrian block at the node whose associated boxes contain the new datapoint
-        else
-            j_wave.left = j_prime
-            j_wave.right = j
-            if get(j.Θ).Intervals[d,1]< x 
-                get(j.Θ).Intervals[d,1]= x      #adapt box of j according to new split
-            end
-            j_prime.Θ = j_wave.Θ
-            get(j_wave.Θ).Intervals[d,2] = x
-            A=zeros(1,length(X))
-            A[:,:]=X
-            Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,A,[Y])  #sample a mondrian block at the node whose associated boxes contain the new datapoint
-        end
+        backpropergate_c_tab(j_wave,Y) 
+            
+        j_prime = init_j_prime(j_wave,Y)
+        A,j_wave,j_prime = check_left_right!(j_wave,j,j_prime,X,d,x)
+        Sample_Mondrian_Block!(j_prime,get(j_prime.Θ),λ,T,A,[Y])
 
 
-        else                                    # if the split didn't occur in time
+    else                                 # if the split didn't occur in time
         Θ = update_intervals(get(j.Θ),X)        # update the boxes of j
         j.Θ=Θ
         if j.node_type != [false,true,false]    # check if j is a leaf
             if X[get(j.δ)] < get(j.ζ)           # if the new datapoint is in the boxes associated with the left child of j -> Extend towards the left child, else the right
+                     
                 Extend_Mondrian_Block!(T,λ,get(j.left),X,Y)
             else
+                    
                 Extend_Mondrian_Block!(T,λ,get(j.right),X,Y)
+                
             end
         end
     end
@@ -178,6 +140,7 @@ end
 
 This function expands an already sampled Mondrian Forest Classifier by a desired number of datapoints.
 
+
 `Input`: Mondrian Forest Classifier MF (abstract type Mondrian_Forest_Classifier), array of features X_extend to extend the forest on, Array of class labels Y_extend corresponding to the new features, life time parameter λ
 
 `Output`: Mondrian Forest Classifier with incoporated new datapoints
@@ -194,8 +157,9 @@ function expand_forest!(MF::Mondrian_Forest_Classifier,X_extend, Y_extend,λ)
         println("Error - the number of features in the new data doesn't fit the original data")
     end
     Trees=MF.Trees
+    Features = MF.Features
     @parallel for i=1:MF.n_trees
-        T = expand!(Trees[i], X_extend,Y_extend,λ)
+        T = expand!(Trees[i], X_extend[:,Feature[i]],Y_extend,λ)
         Trees[i]=T
     end
      MF.Trees=Trees
