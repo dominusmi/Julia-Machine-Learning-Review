@@ -319,50 +319,22 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
         pⱼ = 1-exp(-Δⱼ*nⱼ)
         # yes this part does add nodes to the tree!
         if pⱼ > 0 && j.node_type != [false,false,true]
-            # x branches
-            jₓ = Mondrian_Node(0.0,[true,false,false])
-            if (j == get(j.parent).left)
-                get(j.parent).left = jₓ
-                jₓ.left = j
-                jₓ.right = Mondrian_Node(j.τ,[false,true,false])
-                j_wave = get(jₓ.right)
-            else
-                get(j.parent).right = jₓ
-                jₓ.right = j
-                jₓ.left = Mondrian_Node(j.τ,[false,true,false])
-                j_wave = get(jₓ.left)
-            end
-            # setting up the branched node
-            jₓ.parent = get(j.parent)
-            j.parent = jₓ
-            j_wave.parent = jₓ
-            push!(Tree.leaves, j_wave)
-
-            jₓ.Θ = get(j.parent).Θ
-            jₓ.δ = get(j.parent).δ
-            jₓ.ζ = get(j.parent).ζ
-            # child set up
-            j_wave.c = zeros(length(j.c))
-            j_wave.Θ = Axis_Aligned_Box(get_intervals(Datum))
-            j_wave.δ = get(j.parent).δ
-            j_wave.ζ = get(j.parent).ζ
-
             d = expected_discount(nⱼ, Δⱼ, γ)
-
-            jₓ.tab = zeros(length(j.c))
-            jₓ.c = zeros(length(j.c))
-            jₓ.Gₚ = zeros(length(j.c))
+            tab = zeros(length(j.c))
+            c = zeros(length(j.c))
+            Gₚ = zeros(length(j.c))
             for k in 1:length(j.c)
-                jₓ.c[k] = min(j.c[k],1)
+                c[k] = min(j.c[k],1)
             end
-            jₓ.tab = jₓ.c
+            tab = c
             for k in 1:length(j.c)
-                jₓ.Gₚ[k] = (1/(sum(jₓ.c)))*(jₓ.c[k] - d*jₓ.tab[k]+d*sum(jₓ.tab)*jₓ.Gₚ[k])
+                Gₚ[k] = (1/(sum(c)))*(c[k] - d*tab[k]+d*sum(tab)*Gₚ[k])
             end
-            j_wave.Gₚ = jₓ.Gₚ
+            #j_wave.Gₚ = jₓ.G
             for k in 1:length(s)
-                s[k] += not_sep*(pⱼ)*jₓ.Gₚ[k]
+                s[k] += not_sep*(pⱼ)*Gₚ[k]
             end
+            return s
         end
         if j.node_type[2] == true
             for k in 1:length(s)
@@ -371,15 +343,10 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
             return s
         else
             not_sep = not_sep*(1-pⱼ)
-            try
-                if Datum[get(j.δ)] <= get(j.ζ)
-                    j = get(j.left)
-                else
-                    j = get(j.right)
-                end
-                #throw(new Exception(""))
-            catch e
-                #println(j.τ)
+            if Datum[get(j.δ)] <= get(j.ζ)
+                j = get(j.left)
+            else
+                j = get(j.right)
             end
         end
     end
