@@ -148,7 +148,7 @@ function train!{X<:Array{Float64, N} where N,
                 Labels::Y,
                 λ::Float64=1e9,
                 random_features=Int(ceil(size(Data,2)/2)))
-    @parallel for i in 1:MF.n_trees
+    @sync @parallel for i in 1:MF.n_trees
         features = randperm(size(Data,2))[1:random_features]
         push!(MF.Trees,Mondrian_Tree_Classifier())
         push!(MF.Features,features)
@@ -169,7 +169,6 @@ function predict!{X<:Array{<: AbstractFloat,N} where N}(
                   MF::Mondrian_Forest_Classifier,
                   Data::X)
     pred=zeros(MF.n_trees,size(Data,1))
-    println("")
     for i in 1:MF.n_trees
         pred[i,:] = predict!(MF.Trees[i], Data[:,MF.Features[i]])
     end
