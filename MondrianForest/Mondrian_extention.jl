@@ -49,7 +49,7 @@ This function calls the functions
 
 ## Algorithm 4 in the Paper 
 function Extend_Mondrian_Block!(T::Mondrian_Tree,λ::Float64,j::Mondrian_Node,X::Array{Float64},Y::Int64)
-    
+    println("I do something")
 if sum(j.c .> 0) == 1  #check if all labels are identical
      Θ = update_intervals(get(j.Θ),X)        # update extent
      j.Θ=Θ 
