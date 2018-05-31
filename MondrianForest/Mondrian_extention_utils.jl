@@ -196,8 +196,7 @@ This function is one of the utility functions to run "Extend_Mondrian_Block!".
 function init_j_prime(j_wave::Mondrian_Node,Y::Int64)
    j_prime = Mondrian_Node(0.0, [true,false,false])   #initialise new sibling to j
         j_prime.parent = j_wave
-        j_prime.tab = zeros(size(j_wave.tab))
-        j_prime.tab[Y] = 1
+        j_prime.tab = zeros(size(j_wave.tab)).+1
         j_prime.c = zeros(size(j_wave.c))
         j_prime.c[Y] = 1
         j_prime.Gₚ=zeros(size(j_wave.Gₚ)) 

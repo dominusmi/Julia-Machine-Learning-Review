@@ -147,7 +147,7 @@ function train!{X<:Array{Float64, N} where N,
                 Data::X,
                 Labels::Y,
                 λ::Float64=1e9,
-                random_features=ceil(size(Data,2)))
+                random_features=Int(ceil(size(Data,2)/2)))
     @parallel for i in 1:MF.n_trees
         features = randperm(size(Data,2))[1:random_features]
         push!(MF.Trees,Mondrian_Tree_Classifier())
