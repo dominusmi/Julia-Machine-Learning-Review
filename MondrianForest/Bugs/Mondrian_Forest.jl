@@ -1,4 +1,4 @@
-include("../Mondrian_Forest_Classifier.jl");
+include("Mondrian_Forest_Classifier.jl");
 
 import Base.copy
 using Distributions
