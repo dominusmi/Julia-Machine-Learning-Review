@@ -90,9 +90,10 @@ function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
                                Tree::Mondrian_Tree,
                                λ::AbstractFloat,
                                Data::X,
-                               Labels::Y)
+                               Labels::Y,
+                               n_lab=26)
     # initialise the tree
-    classes = unique(Labels)
+    classes = zeros(n_lab)
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(Data))
@@ -308,8 +309,8 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
     not_sep = 1
     s = zeros(size(j.c,1))
     while true
-        if (sum(j.node_type)==0)
-            break
+        if (sum(j.c)==0)
+            j.c = get(j.parent).c
         end
         if (j.node_type[3] == true)
             Δⱼ = j.τ
@@ -333,6 +334,9 @@ function predict!{X<:Array{Float64,1}}(Tree::Mondrian_Tree,
             tab = c
             for k in 1:length(j.c)
                 Gₚ[k] = (1/(sum(c)))*(c[k] - d*tab[k]+d*sum(tab)*Gₚ[k])
+            end
+            if (isnan.(Gₚ[1]))
+                println(j.c)
             end
             #j_wave.Gₚ = jₓ.G
             for k in 1:length(s)
