@@ -93,7 +93,7 @@ function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
                                Labels::Y,
                                n_lab=26)
     # initialise the tree
-    classes = zeros(n_labl)
+    classes = zeros(n_lab)
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(Data))
