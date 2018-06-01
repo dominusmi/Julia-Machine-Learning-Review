@@ -93,7 +93,7 @@ function Sample_Mondrian_Tree!{X<:Array{<: AbstractFloat,N} where N,
                                Labels::Y,
                                n_lab=26)
     # initialise the tree
-    classes = zeros(n_labl)
+    classes = zeros(n_lab)
     e = Mondrian_Node(0.0,[false,false,true])
     Tree.root = e
     Θ = Axis_Aligned_Box(get_intervals(Data))
@@ -127,14 +127,11 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
                                 Labels::Y)
     # paused mondrian check
     # should be one for pure targets
-    if sum(j.c .> 0) == 1 || size(j.indices,1) == 1
+    if sum(j.c .> 0) == 1
         j.τ = λ
-        j.Paused_Data[1] = Data
-        j.Paused_Data[2] = Labels
     else
         # not paused, sample the time
         E = rand(Exponential(1/Linear_dimension(Θ)))
-        #println(E, 1/Linear_dimension(Θ))
         if j.node_type[3]==true
             τₚ = 0
         else
@@ -150,41 +147,38 @@ function Sample_Mondrian_Block!{X<:Array{<:AbstractFloat, N} where N,
         # update node j's data
         j.δ = d
         j.ζ = x
-        # Θᴸ = copy(Θ)
-        # # look at this copy
-        # Θᴿ = copy(Θ)
-        # Left and Right children have constricted boxes
-        # Θᴸ.Intervals[d,2]=x
-        # Θᴿ.Intervals[d,1]=x
-        # check there is actually data here
-        # Dataᴿ = get_data_indices(Θᴿ,Data,d)
-        # Dataᴸ = get_data_indices(Θᴸ,Data,d)
+
         Dataᴿ = find(Data[:,d] .> x)
         Dataᴸ = find(Data[:,d] .<= x)
+        # strictly binary tree
+        if (size(Dataᴿ,1)>0 && size(Dataᴸ,1)>0)
+            Θᴿ = Axis_Aligned_Box(get_intervals(Data[Dataᴿ,:]))
+            Θᴸ = Axis_Aligned_Box(get_intervals(Data[Dataᴸ,:]))
+            right = Mondrian_Node(0.0, [true,false,false])
+            right.parent = j
+            # data changes A2 -> lines 8,9,10
+            right.Θ = Θᴿ
+            get_count(right, Labels[Dataᴿ], length(j.c))
+            right.Gₚ=zeros(size(j.c,1))
+            j.right = right
 
-        Θᴿ = Axis_Aligned_Box(get_intervals(Data[Dataᴿ,:]))
-        Θᴸ = Axis_Aligned_Box(get_intervals(Data[Dataᴸ,:]))
+            left = Mondrian_Node(0.0, [true,false,false])
+            left.parent = j
+            left.Θ = Θᴸ
+            get_count(left, Labels[Dataᴸ], length(j.c))
+            left.Gₚ = zeros(size(j.c,1))
+            j.left = left
 
-        right = Mondrian_Node(0.0, [true,false,false])
-        right.parent = j
-        right.indices = Dataᴿ
-        # data changes A2 -> lines 8,9,10
-        right.Θ = Θᴿ
-        get_count(right, Labels[Dataᴿ], length(j.c))
-        right.Gₚ=zeros(size(j.c,1))
-        j.right = right
-
-        left = Mondrian_Node(0.0, [true,false,false])
-        left.parent = j
-        left.indices = Dataᴸ
-        left.Θ = Θᴸ
-        get_count(left, Labels[Dataᴸ], length(j.c))
-        left.Gₚ = zeros(size(j.c,1))
-        j.left = left
-
-        # recurse
-        Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, Data[Dataᴸ,:], Labels[Dataᴸ])
-        Sample_Mondrian_Block!(right, get(right.Θ), λ, Tree, Data[Dataᴿ,:], Labels[Dataᴿ])
+            # recurse
+            Sample_Mondrian_Block!(left, get(left.Θ), λ, Tree, Data[Dataᴸ,:], Labels[Dataᴸ])
+            Sample_Mondrian_Block!(right, get(right.Θ),λ, Tree, Data[Dataᴿ,:], Labels[Dataᴿ])
+        # set j as a leaf for no data/ not binary
+        else
+            j.τ = λ
+            j.node_type = [false,true,false]
+            push!(Tree.leaves,j)
+            return
+        end
     # set j as leaf for time out
     else
         j.τ = λ
