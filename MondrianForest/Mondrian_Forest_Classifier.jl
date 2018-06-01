@@ -88,8 +88,9 @@ function train!{X <:Array{<: AbstractFloat,N} where N,
                 MT::Mondrian_Tree_Classifier,
                 Data::X,
                 Labels::Y,
-                λ::Float64=1e9)
-    Sample_Mondrian_Tree!(MT.Tree,λ,Data,Labels)
+                λ::Float64=1e9,
+                n_lab = 26)
+    Sample_Mondrian_Tree!(MT.Tree,λ,Data,Labels, 26)
     compute_predictive_posterior_distribution!(MT.Tree,10*size(Data,2))   # TODO get rid of this override
     MT.X = Data
     MT.Y = Labels
