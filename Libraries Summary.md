@@ -7,7 +7,7 @@ A generic notebook describing the methods can be found [here](Scouting/Linear%20
 | Package works | yes | yes | yes |
 | Deprecations warnings      | No | No | No |
 | Compatible with JuliaDB | If transformed into matrix | If transformed into matrix | If transformed into matrix |
-| Contains documentation | yes, but not great | very good | Yes, mostly very good |
+| Documentation | lacking | very good | very good |
 | Simplicity | good | good | High |
 
 ### SVM
@@ -19,7 +19,7 @@ Theory on support vector machines is found [here](Scouting/SupportVectorMachines
 | Package works | no | yes | no |
 | Deprecations warnings      | yes | No | yes |
 | - | If transformed into matrix | yes | - |
-| Contains documentation | no | yes, as inline documentation. Type ?Functionname | no |
+| Documentation | none | yes, as inline documentation. Type ?Functionname | none |
 | Simplicity | good | medium | good |
 
 
@@ -37,7 +37,7 @@ A notebook detailing boosting and gradient boosting is available [here](Scouting
 | Packages works            | no                               | Yes | No
 | Deprecation warnings      | None                              | None | Several
 | Compatible with JuliaDB   | Yes (transformation of tables to arrays required) | - |
-| Contains Documetation     | No            | Points to XGBoost docs | No, few examples |
+| Documetation              | None            | Points to XGBoost docs | few examples |
 
 
 ### Decision Trees
@@ -52,7 +52,7 @@ A generic notebook discussing decision tree models is available [here](Scouting/
 | Packages works            | yes                               | Yes | Yes
 | Deprecation warnings      | None                              | Some | None
 | Compatible with JuliaDB   | Yes (transformation of tables to arrays required) | Yes (transformation of tables to arrays required) | Yes (transformation of tables to arrays required) |
-| Contains Documetation     | No, but many examples             | Yes (very good!) | No |
+| Documetation              | None, but many examples             | very good | None |
 | Simplicity                | Good, like sklearn                | good | quite low |
 
 ### Utilities
@@ -72,7 +72,7 @@ to follow python's sklearn.metrics closely.
 | Packages works            | yes | yes | yes|yes|
 | Deprecation warnings      | None | No |No|yes|
 | Compatible with JuliaDB   | If tables are converted to arrays or dataframes | If tables transformed into arrays |If tables transformed into arrays|yes|
-| Contains Documetation     | No, but sufficient examples | yes |yes|no|
+| Documetation              | None, but sufficient examples | good | good | none |
 | Simplicity                | Fair | good |good|good|
 
 
