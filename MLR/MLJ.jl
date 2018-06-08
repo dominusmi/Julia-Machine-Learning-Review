@@ -209,6 +209,23 @@ function predictᵧ(learner::ModelLearner,
     predictᵧ(learner.modelᵧ, data_features, task)
 end
 
+
+"""
+    Import specific wrapper
+"""
+function load(wrapper::AbstractString)
+    include(wrapper*"_wrapper.jl")
+end
+
+"""
+    Loads all wrappers in folder "wrapper"
+"""
+function loadAll()
+    for wrapper in readdir("wrappers")
+        include(wrapper)
+    end
+end
+
 include("Tuning.jl")
 include("Stacking.jl")
 include("Resampling.jl")
