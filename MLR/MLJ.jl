@@ -214,7 +214,7 @@ end
     Import specific wrapper
 """
 function load(wrapper::AbstractString)
-    include(wrapper*"_wrapper.jl")
+    include("wrappers/"*wrapper*"_wrapper.jl")
 end
 
 """
