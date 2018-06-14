@@ -17,6 +17,9 @@ function plot_storage(storage::MLRStorage; plotting_args=[])
             end
         end
 
+        if model == "multivariate"
+            println("averageCV: $(storage.averageCV[indeces])")
+        end
         measures = storage.averageCV[indeces]
         for dict in storage.parameters[indeces]
             _marker = ""
