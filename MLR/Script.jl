@@ -1,5 +1,12 @@
 include("MLJ.jl")
 
+# TODO:
+#   parse wrappers and extract information
+#   fix libsvm predict function
+#   make the task regression/classification actually useful
+#   add more models
+
+
 # Decision trees example
 
 load("decisiontree")
@@ -12,7 +19,6 @@ modelᵧ = learnᵧ(lrn, task)
 predictᵧ(modelᵧ, data[:,task.features], task)
 
 # Multivariate example
-
 load("multivariate")
 data = Fakedata(1000,4)
 
@@ -51,7 +57,7 @@ lrn = tune(lrn, task, ps, measure=mean_squared_error, storage=storage)
 
 include("Visualisation.jl")
 
-plot_storage(storage)
+plot_storage(storage, plotting_args=Dict(:title=>"A visualisation example"))
 
 # Example classification using SVM with type and cost tuning
 
@@ -92,7 +98,7 @@ load("glm")
 load("multivariate")
 
 data = Fakedata(1000,4)
-task = Task(task_type="regression", targets=[3], data=data)
+task = Task(task_type="regression", targets=[5], data=data)
 
 lrns = Array{Learner}(0)
 psSet = Array{ParametersSet}(0)
@@ -133,7 +139,7 @@ mp = MLRMultiplex(lrns, psSet)
 
 tune(mp, task, storage=storage, measure=mean_squared_error)
 
-#plot_storage(storage, plotting_args=Dict(:scale=>:log10))
+plot_storage(storage, plotting_args=Dict(:ylim=>(0.0,0.035)))
 
 
 # Stacking
@@ -192,7 +198,6 @@ accuracy(pp, data[:,task.targets[1]])
 
 
 # Different fake data for classification checks
-
 x = zeros(20,2)
 y = zeros(Int64, 20,1)
 for i in 1:10
